@@ -1,0 +1,6 @@
+{
+    "extends": "react",
+    "rules": {
+        "no-console": "warn"
+    }
+}
