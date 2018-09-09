@@ -120,9 +120,36 @@ class InHousePage extends React.Component {
         } else {
             this.setState({ showSpinner: false });
         }
-        this.props.inHousePageActions.inHousePageColumnConfig(columnsConfig);
-        let URL = "https://goli-soda-services.herokuapp.com/api/inhouse-getdata";
-        this.props.inHousePageActions.getInHousePageDetails(URL);
+        if (_.isEmpty(this.props.columnConfig)) {
+            this.props.inHousePageActions.inHousePageColumnConfig(columnsConfig);
+        }
+        if (_.isEmpty(this.props.initialGridData)) {
+            let URL = "https://goli-soda-services.herokuapp.com/api/inhouse-getdata";
+            this.props.inHousePageActions.getInHousePageDetails(URL);
+        }
+
+        if (!_.isEmpty(this.props.initialGridData) && !_.isEmpty(this.props.columnConfig) && _.isEmpty(this.props.updatedGridData)) {
+            let sortedGridData = _.sortBy(this.props.initialGridData, 'id');
+            if (sortedGridData.length > 5) {
+                let newGridData = sortedGridData.slice(Math.max(sortedGridData.length - 5, 1));
+                newGridData.map((obj, index) => {
+                    obj.s_no = index + 1;
+                });
+                this.setState({ rowData: newGridData, columnsConfig: this.props.columnConfig });
+                this.props.inHousePageActions.updateInHousePageGridData(newGridData);
+            } else {
+                sortedGridData.map((obj, index) => {
+                    obj.s_no = index + 1;
+                });
+                this.setState({ rowData: sortedGridData, columnsConfig: this.props.columnConfig });
+                this.props.inHousePageActions.updateInHousePageGridData(sortedGridData);
+            }
+        }
+        if (!_.isEmpty(this.props.columnConfig) && !_.isEmpty(this.props.updatedGridData)) {
+            let sortedGridData = _.sortBy(this.props.updatedGridData, 'id');
+            this.setState({ rowData: sortedGridData, columnsConfig: this.props.columnConfig });
+            this.props.inHousePageActions.updateInHousePageGridData(sortedGridData);
+        }
     }
 
     componentWillReceiveProps(nextProps) {
@@ -139,14 +166,16 @@ class InHousePage extends React.Component {
                     obj.s_no = index + 1;
                 });
                 this.setState({ rowData: newGridData, columnsConfig: nextProps.columnConfig });
+                this.props.inHousePageActions.updateInHousePageGridData(newGridData);
             } else {
                 sortedGridData.map((obj, index) => {
                     obj.s_no = index + 1;
                 });
                 this.setState({ rowData: sortedGridData, columnsConfig: nextProps.columnConfig });
+                this.props.inHousePageActions.updateInHousePageGridData(sortedGridData);
             }
         }
-        if (!_.isEmpty(nextProps.columnConfig) && !_.isEmpty(nextProps.updatedGridData)) {
+        if (!_.isEmpty(nextProps.columnConfig) && !_.isEmpty(nextProps.updatedGridData) && !_.isEqual(this.props.updatedGridData, nextProps.updatedGridData)) {
             let sortedGridData = _.sortBy(nextProps.updatedGridData, 'id');
             // if (sortedGridData.length > 5) {
             //     let newGridData = sortedGridData.slice(Math.max(sortedGridData.length - 5, 1));
@@ -159,6 +188,8 @@ class InHousePage extends React.Component {
             //     obj.s_no = index + 1;
             // });
             this.setState({ rowData: sortedGridData, columnsConfig: nextProps.columnConfig });
+            this.props.inHousePageActions.updateInHousePageGridData(sortedGridData);
+
             // }
         }
     }
@@ -180,30 +211,20 @@ class InHousePage extends React.Component {
     };
 
     onClickSave = () => {
-        // let newGridData = 
-        // this.props.inHousePageActions.updateInHousePageGridData(this.state.rowData);
         let newObjects = [];
         // let SaveURL = "http://localhost:3010/api/inhouse-savedata";
         let SaveURL = "https://goli-soda-services.herokuapp.com/api/inhouse-savedata";
-        
-        if (!_.isEmpty(this.state.rowData) && this.state.rowData.length > 5 && !_.isEqual(this.state.rowData, this.props.updatedGridData)) {
-            this.state.rowData.map((obj, index) => {
-                if (obj.s_no > 5) {
-                    newObjects.push(obj);
-                }
-            });
-            if(!_.isEmpty(newObjects)){
-                newObjects.map((obj)=>{
+        let rowData = _.cloneDeep(this.state.rowData);
+        if (!_.isEmpty(rowData) && rowData.length > 5 && !_.isEqual(rowData, this.props.updatedGridData)) {
+            newObjects = _.differenceWith(rowData, this.props.updatedGridData, (obj1, obj2) => { return obj1.s_no === obj2.s_no });
+            if (!_.isEmpty(newObjects)) {
+                newObjects.map((obj) => {
                     delete obj.s_no;
                 });
+                this.props.inHousePageActions.saveInHouseData(SaveURL, { inhousedata: newObjects });
             }
-            console.log("...newData", newObjects);
-            this.props.inHousePageActions.saveInHouseData(SaveURL, {inhousedata: newObjects});
             this.props.inHousePageActions.updateInHousePageGridData(this.state.rowData);
         }
-        // if(!_.isEmpty(this.state.rowData) && !_.isEqual(this.state.rowData, this.props.updatedGridData)){
-
-        // }
         this.dialog.show({
             body: this.state.showMessage ? this.state.showMessage : "Data Saved Successfuly.",
             bsSize: "small",
@@ -272,7 +293,7 @@ class InHousePage extends React.Component {
                 newRowData = rowData.filter((item) => item.s_no !== this.state.rowId);
                 newRowData.map((obj, index) => {
                     if (obj.s_no > this.state.rowId) {
-                        obj.s_no = obj.s.no - 1;
+                        obj.s_no = obj.s_no - 1;
                     }
                 });
                 this.setState({ rowData: newRowData, undoStack, redoStack: [] });
@@ -314,7 +335,6 @@ class InHousePage extends React.Component {
         }
     }
     render() {
-        console.log("...render", this.state.rowData);
         return (
             <div className="in-house-container">
                 <Dialog ref={(el) => { this.dialog = el }} />
