@@ -10,7 +10,7 @@ export default connect(
 },
     (dispatch)=>{
         return {
-                actions: bindActionCreators(LandingPageActions, dispatch)
+                landingPageActions: bindActionCreators(LandingPageActions, dispatch)
         };
 }
 )(LandingPage);
