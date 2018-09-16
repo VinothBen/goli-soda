@@ -11,16 +11,17 @@ class LandingPage extends React.Component {
         }
     }
     componentWillMount() {
-        // if(!_.isEmpty(this.props.routes) && this.props.routes[1].path){
-        //     for(let i=0;i<this.state.navOptions.length;i++){
-        //         let routingValue ="/" + this.state.navOptions[i].replace(/\s+/g, '-').toLocaleLowerCase();
-        //         if(routingValue === this.props.routes[1].path){
-        //             this.setState({activeIndex: i.toString()});
-        //             break;
-        //         }
-        //     }
-        // }
-        this.props.landingPageActions.landingPageActionCheck("Hai!");
+        
+        if(!_.isEmpty(this.props.routes) && this.props.routes[1].path){
+            for(let i=0;i<this.state.navOptions.length;i++){
+                let routingValue ="/" + this.state.navOptions[i].replace(/\s+/g, '-').toLocaleLowerCase();
+                if(routingValue === this.props.routes[1].path){
+                    this.setState({activeIndex: i.toString()});
+                    break;
+                }
+            }
+        }
+        // this.props.landingPageActions.landingPageActionCheck("Hai!");
       
     }
     // componentWillReceiveProps(nextProps){

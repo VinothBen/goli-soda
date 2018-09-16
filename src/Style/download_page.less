@@ -1,0 +1,120 @@
+.download-page{
+    .downloadpage-searchcontainer {
+        width: 60%;
+        position: relative;
+        top: 15px;
+        height: 50px;
+        left: 20%;
+        border: solid thin #425794;
+        // box-shadow: 0px 0px 5px 0px #4257945e;
+        .date-header {
+            float: left;
+            margin: 14px 0px 0px 20px;
+            
+        }
+        .date-details {
+            border: solid thin;
+            position: relative;
+            width: 250px;
+            height: 30px;
+            float: left;
+            margin: 9px 0px 0px 10px;
+            text-align: left;
+            font-size: large;
+            font-style: italic;
+            z-index: 99;
+            .date-value {
+                margin: 3px 0px 0px 10px;
+                color: #425794;
+            }
+            .date-icon {
+                float: right;
+                margin: 3px;
+                font-size: larger;
+                color: gray;
+            }
+        }
+        .date-picker {
+            position: absolute;
+            background-color: white;
+            width: fit-content;
+            top: 48px;
+            float: left;
+            border-radius: 10px;
+            border: solid thin;
+            z-index: 999;
+            left: 100px;
+        
+        }
+        .button-search {
+            float: right;
+            margin: 10px;
+            width: 100px;
+            position: relative;
+        }
+        .date-warning-message {
+            color: red;
+            position: relative;
+            left: 10px;
+            top: 15px;
+        }
+    }
+    .datagrid-container-1 {
+        position: relative;
+        top: 50px;
+        // z-index: -9;
+        .react-grid-Container {
+            width: 1260px !important;
+            position: relative;
+            left: 10%;
+        }
+        .grid-header-name {
+            position: relative;
+            margin-left: 100px;
+            margin-bottom: 10px;
+            right: 20px;
+            bottom: 10px;
+            .button-download{
+                float: right;
+                position: relative;
+                right: 70px;
+            }
+            h4{
+                float: left;
+            }
+        }
+    }
+    .datagrid-container-2 {
+        position: relative;
+        top: 90px;
+        // z-index: -9;
+        .react-grid-Container {
+            width: 1260px !important;
+            position: relative;
+            left: 10%;
+        }
+        .grid-header-name {
+            margin-left: 100px;
+            margin-bottom: 10px;
+            h4{
+                float: left;
+                margin-bottom: 20px;
+            }
+        }
+    }
+    .spinner-backround {
+        position: absolute;
+        width: 100%;
+        height: 150%;
+        background-color: #d3d3d3;
+        top: 13%;
+        z-index: 99;
+        opacity: 0.5;
+    }
+    .in-house-spinner {
+        position: absolute;
+        z-index: 99999;
+        left: 50%;
+        top: 35%;
+    }
+}
