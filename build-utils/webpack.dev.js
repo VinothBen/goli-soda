@@ -1,16 +1,37 @@
 require('babel-polyfill');
 const commonPaths = require('./common-paths');
 const webpack = require('webpack');
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const port = parseInt(process.env.PORT, 10) || 3000;
 const config = {
   mode: 'development',
   entry: {
-    app: ['babel-polyfill',`${commonPaths.appEntry}/index.js`]
+    app: ['babel-polyfill', `${commonPaths.appEntry}/index.js`]
   },
   output: {
     filename: '[name].[hash].js'
   },
-  devtool: 'inline-source-map',
+  optimization: {
+    minimizer: [
+      new UglifyJsPlugin({
+        cache: true,
+        parallel: true,
+        uglifyOptions: {
+          warnings: false,
+          parse: {},
+          compress: {},
+          mangle: true,
+          output: null,
+          toplevel: false,
+          nameCache: null,
+          ie8: false,
+          keep_fnames: false,
+        },
+        sourceMap: true
+      })
+    ]
+  },
+  devtool: 'eval-source-map',
   module: {
     rules: [
       {
@@ -75,14 +96,14 @@ const config = {
     compress: true,
   },
   node: {
-    fs: 'empty', 
+    fs: 'empty',
     dns: 'empty',
     net: 'empty',
     tls: 'empty'
   },
   externals: [
-    {'./cptable': 'var cptable'},
-    {'./jszip': 'jszip'}
+    { './cptable': 'var cptable' },
+    { './jszip': 'jszip' }
   ]
 };
 module.exports = config;

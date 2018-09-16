@@ -3,6 +3,8 @@ const commonPaths = require('./common-paths');
 const webpack = require('webpack');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+// const Uglify = require("uglifyjs-webpack-plugin");
+
 const config = {
   mode: 'production',
   entry: {
@@ -11,7 +13,6 @@ const config = {
   output: {
     filename: 'static/[name].[hash].js'
   },
-  devtool: 'source-map',
   module: {
     rules: [
       {
@@ -23,7 +24,7 @@ const config = {
               loader: 'css-loader',
               options: {
                 importLoaders: 1,
-                sourceMap: true
+                sourceMap: false
               }
             },
             {
@@ -47,13 +48,13 @@ const config = {
           loader: "style-loader"
         }, {
           loader: "css-loader", options: {
-            sourceMap: true
+            sourceMap: false
           }
         }, {
           loader: "less-loader", options: {
             strictMath: true,
             noIeCompat: true,
-            sourceMap: true
+            sourceMap: false
           }
         }]
       },
