@@ -50,7 +50,7 @@ class LandingPage extends React.Component {
     render() {
         return (< div className="landing-page-container">
             <div className="navigation-bar">
-                <div className="header-text"><span className="first">Goli&nbsp;</span><span className="second">Soda</span></div>
+                <div className="header-text"><span className="first">Kannan&nbsp;</span><span className="second">Soda</span></div>
                 <ul onClick={this.onClickNavMenu}>
                     {this.getNavigationMenu(this.state.navOptions)}
                 </ul>

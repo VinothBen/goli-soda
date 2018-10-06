@@ -68,7 +68,7 @@ class DownloadPage extends React.Component {
             }
         ];
         this.setState({ rowData, columnsConfig });
-        console.log("...props", this.props, new Date().toISOString());
+        // console.log("...props", this.props, new Date().toISOString());
     }
     // componentWillReceiveProps(nextProps) {
     //     console.log("...nextProps", nextProps);

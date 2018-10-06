@@ -1,11 +1,10 @@
 import {bindActionCreators} from "redux";
 import {connect} from "react-redux";
-import LandingPage from "./LandingPage";
-import * as LandingPageActions from "./LandingPage.Actions";
+import LoginPage from "./LoginPage";
+import * as LandingPageActions from "../LandingPage/LandingPage.Actions";
 export default connect(
     (state)=>{
        return {
-                data: state.landingPageReducer.data,
                 token: state.landingPageReducer.token,
                 username: state.landingPageReducer.username,
                 errorMessage: state.landingPageReducer.errorMessage,
@@ -13,7 +12,7 @@ export default connect(
 },
     (dispatch)=>{
         return {
-                landingPageActions: bindActionCreators(LandingPageActions, dispatch)
+            landingPageActions: bindActionCreators(LandingPageActions, dispatch)
         };
 }
-)(LandingPage);
+)(LoginPage);

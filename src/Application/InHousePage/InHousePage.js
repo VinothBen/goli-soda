@@ -6,6 +6,8 @@ import Workbook from 'react-excel-workbook';
 import { FadeLoader } from 'react-spinners';
 import Dialog from 'react-bootstrap-dialog'
 import index from "react-excel-workbook";
+import { hashHistory } from "react-router";
+
 
 const { AutoComplete: AutoCompleteEditor } = Editors;
 // const days = [
@@ -66,132 +68,149 @@ class InHousePage extends React.Component {
         //     { "id": 2, "date": "11/27/2017", "day": "Monday", "bottleType": "goli colour", "rate": "6", "bottleCount": "5,280", "empCount": "7", "empCost": "1400", "totalCost": "31680" },
         //     { "id": 3, "date": "11/27/2017", "day": "Monday", "bottleType": "goli soda", "rate": "6", "bottleCount": "5,280", "empCount": "7", "empCost": "1400", "totalCost": "31680" }
         // ];
-        let columnsConfig = [
-            {
-                key: 's_no',
-                name: 'S.NO',
-                width: 50
-            },
-            {
-                key: 'date',
-                name: 'DATE',
-                editable: true
-            },
-            {
-                key: 'day',
-                name: 'DAY',
-                editor: this.DaysDropDownValue
-            },
-            {
-                key: 'bottle_type',
-                name: 'BOTTLE TYPE',
-                editor: this.BottleType
-            },
-            {
-                key: 'rate',
-                name: 'RATE',
-                editable: true
-            },
-            {
-                key: 'no_of_bottles',
-                name: 'NO.OF.BOTTLES',
-                editable: true
-            },
-            {
-                key: 'employee_involved',
-                name: 'EMPLOYEE-INVOLVED',
-                editable: true
-            },
-            {
-                key: 'employee_cost',
-                name: 'EMPLOYEE-COST',
-                editable: true
-            },
-            {
-                key: 'bottles_for_cost',
-                name: 'BOTTLES FOR COST',
-                editable: true
-            }
-        ];
-        // this.setState({ columnsConfig });
-        // this.props.inHousePageActions.inHousePageActionCheck("Hai");
-        if (this.props.showSpinner) {
-            this.setState({ showSpinner: true });
+        if (!_.isEmpty(this.props) && !this.props.username && !this.props.token) {
+            hashHistory.push("/login");
         } else {
-            this.setState({ showSpinner: false });
-        }
-        if (_.isEmpty(this.props.columnConfig)) {
-            this.props.inHousePageActions.inHousePageColumnConfig(columnsConfig);
-        }
-        if (_.isEmpty(this.props.initialGridData)) {
-            let URL = "https://goli-soda-services.herokuapp.com/api/inhouse-getdata";
-            this.props.inHousePageActions.getInHousePageDetails(URL);
-        }
-
-        if (!_.isEmpty(this.props.initialGridData) && !_.isEmpty(this.props.columnConfig) && _.isEmpty(this.props.updatedGridData)) {
-            let sortedGridData = _.sortBy(this.props.initialGridData, 'id');
-            if (sortedGridData.length > 5) {
-                let newGridData = sortedGridData.slice(Math.max(sortedGridData.length - 5, 1));
-                newGridData.map((obj, index) => {
-                    obj.s_no = index + 1;
-                });
-                this.setState({ rowData: newGridData, columnsConfig: this.props.columnConfig });
-                this.props.inHousePageActions.updateInHousePageGridData(newGridData);
+            let columnsConfig = [
+                {
+                    key: 's_no',
+                    name: 'S.NO',
+                    width: 50
+                },
+                {
+                    key: 'date',
+                    name: 'DATE',
+                    editable: true
+                },
+                {
+                    key: 'day',
+                    name: 'DAY',
+                    editor: this.DaysDropDownValue
+                },
+                {
+                    key: 'bottle_type',
+                    name: 'BOTTLE TYPE',
+                    editor: this.BottleType
+                },
+                {
+                    key: 'rate',
+                    name: 'RATE',
+                    editable: true
+                },
+                {
+                    key: 'no_of_bottles',
+                    name: 'NO.OF.BOTTLES',
+                    editable: true
+                },
+                {
+                    key: 'employee_involved',
+                    name: 'EMPLOYEE-INVOLVED',
+                    editable: true
+                },
+                {
+                    key: 'employee_cost',
+                    name: 'EMPLOYEE-COST',
+                    editable: true
+                },
+                {
+                    key: 'bottles_for_cost',
+                    name: 'BOTTLES FOR COST',
+                    editable: true
+                }
+            ];
+            // this.setState({ columnsConfig });
+            // this.props.inHousePageActions.inHousePageActionCheck("Hai");
+            if (this.props.showSpinner) {
+                this.setState({ showSpinner: true });
             } else {
-                sortedGridData.map((obj, index) => {
-                    obj.s_no = index + 1;
-                });
+                this.setState({ showSpinner: false });
+            }
+            if (_.isEmpty(this.props.columnConfig)) {
+                this.props.inHousePageActions.inHousePageColumnConfig(columnsConfig);
+            }
+            if (_.isEmpty(this.props.initialGridData) && this.props.token) {
+                // let URL = "http://localhost:3010/api/inhouse-getdata";
+                let URL = "https://goli-soda-services.herokuapp.com/api/inhouse-getdata";
+                this.props.inHousePageActions.getInHousePageDetails(URL, this.props.token);
+            }
+
+            if (!_.isEmpty(this.props.initialGridData) && !_.isEmpty(this.props.columnConfig) && _.isEmpty(this.props.updatedGridData)) {
+                let sortedGridData = _.sortBy(this.props.initialGridData, 'id');
+                if (sortedGridData.length > 5) {
+                    let newGridData = sortedGridData.slice(Math.max(sortedGridData.length - 5, 1));
+                    newGridData.map((obj, index) => {
+                        obj.s_no = index + 1;
+                    });
+                    this.setState({ rowData: newGridData, columnsConfig: this.props.columnConfig });
+                    this.props.inHousePageActions.updateInHousePageGridData(newGridData);
+                } else {
+                    sortedGridData.map((obj, index) => {
+                        obj.s_no = index + 1;
+                    });
+                    this.setState({ rowData: sortedGridData, columnsConfig: this.props.columnConfig });
+                    this.props.inHousePageActions.updateInHousePageGridData(sortedGridData);
+                }
+            }
+            if (!_.isEmpty(this.props.columnConfig) && !_.isEmpty(this.props.updatedGridData)) {
+                let sortedGridData = _.sortBy(this.props.updatedGridData, 'id');
                 this.setState({ rowData: sortedGridData, columnsConfig: this.props.columnConfig });
                 this.props.inHousePageActions.updateInHousePageGridData(sortedGridData);
             }
         }
-        if (!_.isEmpty(this.props.columnConfig) && !_.isEmpty(this.props.updatedGridData)) {
-            let sortedGridData = _.sortBy(this.props.updatedGridData, 'id');
-            this.setState({ rowData: sortedGridData, columnsConfig: this.props.columnConfig });
-            this.props.inHousePageActions.updateInHousePageGridData(sortedGridData);
-        }
+
     }
 
     componentWillReceiveProps(nextProps) {
-        if (nextProps.showSpinner) {
-            this.setState({ showSpinner: true });
+        // console.log("...nextProps inhouse", nextProps);
+        if (!_.isEmpty(nextProps) && !nextProps.username && !nextProps.token) {
+            hashHistory.push("/login");
         } else {
-            this.setState({ showSpinner: false });
-        }
-        if (!_.isEmpty(nextProps.initialGridData) && !_.isEmpty(nextProps.columnConfig) && _.isEmpty(nextProps.updatedGridData)) {
-            let sortedGridData = _.sortBy(nextProps.initialGridData, 'id');
-            if (sortedGridData.length > 5) {
-                let newGridData = sortedGridData.slice(Math.max(sortedGridData.length - 5, 1));
-                newGridData.map((obj, index) => {
-                    obj.s_no = index + 1;
-                });
-                this.setState({ rowData: newGridData, columnsConfig: nextProps.columnConfig });
-                this.props.inHousePageActions.updateInHousePageGridData(newGridData);
+            if (nextProps.showSpinner) {
+                this.setState({ showSpinner: true });
             } else {
-                sortedGridData.map((obj, index) => {
-                    obj.s_no = index + 1;
-                });
+                this.setState({ showSpinner: false });
+            }
+            // if (_.isEmpty(nextProps.initialGridData) && !_.isEmpty(nextProps.token)) {
+            //     let URL = "http://localhost:3010/api/inhouse-getdata";
+            //     // let URL = "https://goli-soda-services.herokuapp.com/api/inhouse-getdata";
+            //     this.props.inHousePageActions.getInHousePageDetails(URL, nextProps.token.toString());
+            // }
+            if (!_.isEmpty(nextProps.initialGridData) && !_.isEmpty(nextProps.columnConfig) && _.isEmpty(nextProps.updatedGridData)) {
+                let sortedGridData = _.sortBy(nextProps.initialGridData, 'id');
+                if (sortedGridData.length > 5) {
+                    let newGridData = sortedGridData.slice(Math.max(sortedGridData.length - 5, 1));
+                    newGridData.map((obj, index) => {
+                        obj.s_no = index + 1;
+                    });
+                    this.setState({ rowData: newGridData, columnsConfig: nextProps.columnConfig });
+                    this.props.inHousePageActions.updateInHousePageGridData(newGridData);
+                } else {
+                    sortedGridData.map((obj, index) => {
+                        obj.s_no = index + 1;
+                    });
+                    this.setState({ rowData: sortedGridData, columnsConfig: nextProps.columnConfig });
+                    this.props.inHousePageActions.updateInHousePageGridData(sortedGridData);
+                }
+            }
+            if (!_.isEmpty(nextProps.columnConfig) && !_.isEmpty(nextProps.updatedGridData) && !_.isEqual(this.props.updatedGridData, nextProps.updatedGridData)) {
+                let sortedGridData = _.sortBy(nextProps.updatedGridData, 'id');
+                // if (sortedGridData.length > 5) {
+                //     let newGridData = sortedGridData.slice(Math.max(sortedGridData.length - 5, 1));
+                //     newGridData.map((obj, index) => {
+                //         obj.s_no = index + 1;
+                //     });
+                //     this.setState({ rowData: newGridData, columnsConfig: nextProps.columnConfig });
+                // } else {
+                // sortedGridData.map((obj, index) => {
+                //     obj.s_no = index + 1;
+                // });
                 this.setState({ rowData: sortedGridData, columnsConfig: nextProps.columnConfig });
                 this.props.inHousePageActions.updateInHousePageGridData(sortedGridData);
+
+                // }
             }
         }
-        if (!_.isEmpty(nextProps.columnConfig) && !_.isEmpty(nextProps.updatedGridData) && !_.isEqual(this.props.updatedGridData, nextProps.updatedGridData)) {
-            let sortedGridData = _.sortBy(nextProps.updatedGridData, 'id');
-            // if (sortedGridData.length > 5) {
-            //     let newGridData = sortedGridData.slice(Math.max(sortedGridData.length - 5, 1));
-            //     newGridData.map((obj, index) => {
-            //         obj.s_no = index + 1;
-            //     });
-            //     this.setState({ rowData: newGridData, columnsConfig: nextProps.columnConfig });
-            // } else {
-            // sortedGridData.map((obj, index) => {
-            //     obj.s_no = index + 1;
-            // });
-            this.setState({ rowData: sortedGridData, columnsConfig: nextProps.columnConfig });
-            this.props.inHousePageActions.updateInHousePageGridData(sortedGridData);
 
-            // }
-        }
     }
 
     rowGetter = (i) => {
@@ -211,34 +230,36 @@ class InHousePage extends React.Component {
     };
 
     onClickSave = () => {
-        let newObjects = [];
-        // let SaveURL = "http://localhost:3010/api/inhouse-savedata";
-        let SaveURL = "https://goli-soda-services.herokuapp.com/api/inhouse-savedata";
-        let rowData = _.cloneDeep(this.state.rowData);
-        if (!_.isEmpty(rowData) && rowData.length > 5 && !_.isEqual(rowData, this.props.updatedGridData)) {
-            newObjects = _.differenceWith(rowData, this.props.updatedGridData, (obj1, obj2) => { return obj1.s_no === obj2.s_no });
-            if (!_.isEmpty(newObjects)) {
-                newObjects.map((obj) => {
-                    delete obj.s_no;
-                });
-                this.props.inHousePageActions.saveInHouseData(SaveURL, { inhousedata: newObjects });
+        if (!_.isEmpty(this.props) && this.props.username && this.props.username) {
+            let newObjects = [];
+            let SaveURL = "http://localhost:3010/api/inhouse-savedata";
+            // let SaveURL = "https://goli-soda-services.herokuapp.com/api/inhouse-savedata";
+            let rowData = _.cloneDeep(this.state.rowData);
+            if (!_.isEmpty(rowData) && rowData.length > 5 && !_.isEqual(rowData, this.props.updatedGridData)) {
+                newObjects = _.differenceWith(rowData, this.props.updatedGridData, (obj1, obj2) => { return obj1.s_no === obj2.s_no });
+                if (!_.isEmpty(newObjects)) {
+                    newObjects.map((obj) => {
+                        delete obj.s_no;
+                    });
+                    this.props.inHousePageActions.saveInHouseData(SaveURL, { inhousedata: newObjects }, this.props.token);
+                }
+                this.props.inHousePageActions.updateInHousePageGridData(this.state.rowData);
             }
-            this.props.inHousePageActions.updateInHousePageGridData(this.state.rowData);
-        }
-        this.dialog.show({
-            body: this.state.showMessage ? this.state.showMessage : "Data Saved Successfuly.",
-            bsSize: "small",
-            actions: [
-                Dialog.OKAction((dialog) => {
+            this.dialog.show({
+                body: this.state.showMessage ? this.state.showMessage : "Data Saved Successfuly.",
+                bsSize: "small",
+                actions: [
+                    Dialog.OKAction((dialog) => {
+                        dialog.hide()
+                        this.setState({ showSpinner: false });
+                    })
+                ],
+                onHide: (dialog) => {
                     dialog.hide()
                     this.setState({ showSpinner: false });
-                })
-            ],
-            onHide: (dialog) => {
-                dialog.hide()
-                this.setState({ showSpinner: false });
-            }
-        })
+                }
+            })
+        }
     }
     onCreateRow = () => {
         let rowData = _.cloneDeep(this.state.rowData);

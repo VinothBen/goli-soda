@@ -10,7 +10,10 @@ export default connect(
                 updatedGridData: state.inHousePageReducer.updatedGridData,
                 showSpinner: state.inHousePageReducer.showSpinner,
                 showPopUpModel: state.inHousePageReducer.showPopUpModel,
-                popUpMessage: state.inHousePageReducer.popUpMessage
+                popUpMessage: state.inHousePageReducer.popUpMessage,
+                token: state.landingPageReducer.token,
+                username: state.landingPageReducer.username,
+                errorMessage: state.landingPageReducer.errorMessage,
               };
 },
     (dispatch)=>{
