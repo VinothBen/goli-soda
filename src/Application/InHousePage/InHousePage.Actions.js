@@ -1,4 +1,5 @@
 import InHouseConstants from "./InHousePage.Constants";
+import InHouseDataConstants from "./InHousePage.Constants";
 // import axios from "axios";
 // import LocalDB from "../../LocalDB"
 export const inHousePageColumnConfig = (data) => {
@@ -18,6 +19,13 @@ export const updateInHousePageGridData = (data) => {
 export const showInHouseSpinner = (data) => {
     return {
         type: InHouseConstants.SHOW_INHOUSE_SPINNER,
+        data
+    };
+}
+
+export const showDownloadSpinner = (data) => {
+    return {
+        type: InHouseConstants.SHOW_DOWNLOAD_SPINNER,
         data
     };
 }
@@ -70,6 +78,55 @@ export const getInHousePageDetails = (url, tokenValue) => {
             }
         ).catch((error) => {
             dispatch(showInHouseSpinner(false));
+        })
+    }
+}
+export const onErrorSearchDetails = (data) => {
+    return {
+        type: InHouseConstants.ERROR_MESSAGE_WHILE_SEARCHING,
+        data
+    }
+}
+export const successOnSearchDetailsByDate = (data) => {
+    return {
+        type: InHouseConstants.UPDATE_SEARCH_DETAILS_BY_SEARCH,
+        data
+    }
+}
+export const getSearchDetailsByDate = (url, tokenValue) => {
+    return (dispatch) => {
+        dispatch(showDownloadSpinner(true));
+        url = decodeURIComponent(url);
+        let headerValue = {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'authorization': tokenValue
+            }
+        };
+        let requestURL = new Request(url, headerValue);
+        fetch(requestURL).then((response) => {
+            if (response.status >= 400) {
+                throw new Error("Bad Response From Server!");
+                dispatch(showDownloadSpinner(false));
+                dispatch(onErrorSearchDetails({ message: "Bad Response From Server." }));
+            } else {
+                return response.json();
+            }
+        }).then(
+            function (json) {
+                if (json && json.message) {
+                    dispatch(onErrorSearchDetails(json));
+                    dispatch(showDownloadSpinner(false));
+                } else {
+                    dispatch(successOnSearchDetailsByDate(json));
+                    dispatch(showDownloadSpinner(false));
+                }
+
+            }
+        ).catch((error) => {
+            dispatch(showDownloadSpinner(false));
+            dispatch(onErrorSearchDetails(error));
         })
     }
 }

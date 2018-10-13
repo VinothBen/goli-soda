@@ -22,14 +22,20 @@ class LoginPage extends React.Component {
         if (!_.isEmpty(this.props) && this.props.username && this.props.token) {
             hashHistory.push("/in-house");
         }
+        if (this.props.errorMessage) {
+            this.setState({ showSpinner: false });
+        }
     }
     componentWillReceiveProps(nextProps) {
         // console.log("...nextProps login", this.props, nextProps);
         if (!_.isEqual(this.props, nextProps)) {
             if (nextProps.username && nextProps.token) {
-                this.setState({showSpinner:false});
+                this.setState({ showSpinner: false });
                 hashHistory.push("/in-house");
             }
+        }
+        if (nextProps.errorMessage) {
+            this.setState({ showSpinner: false });
         }
     }
     handleChange = (e) => {
@@ -44,7 +50,7 @@ class LoginPage extends React.Component {
             user: _.cloneDeep(formData)
         };
         if (newFormData && newFormData.user.password) {
-            this.setState({showSpinner:true});
+            this.setState({ showSpinner: true });
             newFormData.user.password = CryptoJS.AES.encrypt(newFormData.user.password, 'secret key vinothben').toString();
             // this.props.landingPageActions.loginPostCall("http://localhost:3010/api/user/login", newFormData);
             this.props.landingPageActions.loginPostCall("https://goli-soda-services.herokuapp.com/api/user/login", newFormData);

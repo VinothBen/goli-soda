@@ -1,14 +1,24 @@
 import DownloadPage from "./DownloadPage";
-import {connect} from "react-redux";
+import {bindActionCreators} from "redux";
+import { connect } from "react-redux";
+import * as InHousePageActions from "../InHousePage/InHousePage.Actions";
 
 export default connect(
-    (state)=>{
+    (state) => {
         return {
-                initialGridData: state.inHousePageReducer.initialGridData,
-                updatedGridData: state.inHousePageReducer.updatedGridData,
-                token: state.landingPageReducer.token,
-                username: state.landingPageReducer.username,
-                errorMessage: state.landingPageReducer.errorMessage,
+            initialGridData: state.inHousePageReducer.initialGridData,
+            updatedGridData: state.inHousePageReducer.updatedGridData,
+            showDownaloadPageSpinner: state.inHousePageReducer.showDownaloadPageSpinner,
+            token: state.landingPageReducer.token,
+            username: state.landingPageReducer.username,
+            errorMessage: state.landingPageReducer.errorMessage,
+            searchDetailsByDate: state.inHousePageReducer.searchDetailsByDate,
+            searchErrorMessage: state.inHousePageReducer.searchErrorMessage
+        };
+    },
+    (dispatch) => {
+        return {
+            inHousePageActions: bindActionCreators(InHousePageActions, dispatch)
         };
     }
 )(DownloadPage)
