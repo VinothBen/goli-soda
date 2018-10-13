@@ -6,6 +6,7 @@ import ReactDataGrid from 'react-data-grid';
 import { FadeLoader } from 'react-spinners';
 import Dialog from 'react-bootstrap-dialog';
 import Workbook from 'react-excel-workbook';
+import { hashHistory } from "react-router";
 
 class DownloadPage extends React.Component {
     constructor(props) {
@@ -24,6 +25,9 @@ class DownloadPage extends React.Component {
         }
     }
     componentWillMount() {
+        if (!_.isEmpty(this.props) && !this.props.username && !this.props.token) {
+            hashHistory.push("/login");
+        }
         let rowData = [
             { "id": 1, "date": "11/27/2017", "day": "Monday", "total-bottles": "1400", "bottles-producedfor": "1400", "employee-cost": "1400" },
             { "id": 2, "date": "11/27/2017", "day": "Monday", "total-bottles": "1400", "bottles-producedfor": "1400", "employee-cost": "1400" },
@@ -70,9 +74,12 @@ class DownloadPage extends React.Component {
         this.setState({ rowData, columnsConfig });
         // console.log("...props", this.props, new Date().toISOString());
     }
-    // componentWillReceiveProps(nextProps) {
-    //     console.log("...nextProps", nextProps);
-    // }
+    componentWillReceiveProps(nextProps) {
+        // console.log("...nextProps", nextProps);
+        if (!_.isEmpty(nextProps) && !nextProps.username && !nextProps.token) {
+            hashHistory.push("/login");
+        }
+    }
     // handleChange = (date, v) => {
     //     this.setState({
     //         startDate: date
@@ -124,7 +131,7 @@ class DownloadPage extends React.Component {
                         <div className="date-header"><h4>Select Date:</h4></div>
                         <div onClick={this.handleDatePicker} className="date-details">
                             <span className="date-value">{this.state.selectedDate ? this.state.selectedDate : null}</span>
-                            <span className="glyphicon glyphicon-calendar date-icon"></span>
+                            <i class="far fa-calendar-alt date-icon"></i>
                         </div>
                         {this.state.showDatePicker ? <div className="date-picker">
                             <DateRangePicker
@@ -136,7 +143,7 @@ class DownloadPage extends React.Component {
                         </div> : null}
                         {this.state.showDateWarning ? <span className="date-warning-message">Please Select Date.</span> : null}
                         <button className="btn btn-sm btn-success button-search" onClick={this.onClickSearch}>
-                            <i className="glyphicon glyphicon-search"></i>Search</button>
+                            <i className="fas fa-search search-icon"></i>Search</button>
                     </div>
                 </div>
                 <div className="datagrid-container-1">
@@ -147,7 +154,7 @@ class DownloadPage extends React.Component {
                             <Workbook filename="InHouseData.xlsx"
                                 element={
                                     <button className="btn btn-sm btn-primary button-download">
-                                        <i className="glyphicon glyphicon-download-alt"></i>Download ExcelData</button>
+                                        <i className="fas fa-download"></i>Download ExcelData</button>
                                 }>
                                 <Workbook.Sheet data={this.state.rowData ? this.state.rowData : []} name="InHouseData">
                                     {!_.isEmpty(this.state.columnsConfig) ? this.getWorkBookDetails(this.state.columnsConfig) : null}

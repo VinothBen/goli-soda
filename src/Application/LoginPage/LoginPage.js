@@ -2,7 +2,8 @@ import React from "react";
 import { ValidationForm, TextInput } from 'react-bootstrap4-form-validation';
 import { Modal, Button } from "react-bootstrap";
 import CryptoJS from "crypto-js";
-import {hashHistory} from "react-router";
+import { hashHistory } from "react-router";
+import { FadeLoader } from 'react-spinners';
 
 // import validator from 'validator'
 
@@ -12,7 +13,8 @@ class LoginPage extends React.Component {
         this.state = {
             showLoginPage: true,
             username: "",
-            password: ""
+            password: "",
+            showSpinner: false
         };
     };
     componentWillMount() {
@@ -23,8 +25,9 @@ class LoginPage extends React.Component {
     }
     componentWillReceiveProps(nextProps) {
         // console.log("...nextProps login", this.props, nextProps);
-        if(!_.isEqual(this.props, nextProps)){
-            if(nextProps.username && nextProps.token){
+        if (!_.isEqual(this.props, nextProps)) {
+            if (nextProps.username && nextProps.token) {
+                this.setState({showSpinner:false});
                 hashHistory.push("/in-house");
             }
         }
@@ -41,8 +44,10 @@ class LoginPage extends React.Component {
             user: _.cloneDeep(formData)
         };
         if (newFormData && newFormData.user.password) {
+            this.setState({showSpinner:true});
             newFormData.user.password = CryptoJS.AES.encrypt(newFormData.user.password, 'secret key vinothben').toString();
-            this.props.landingPageActions.loginPostCall("http://localhost:3010/api/user/login", newFormData);
+            // this.props.landingPageActions.loginPostCall("http://localhost:3010/api/user/login", newFormData);
+            this.props.landingPageActions.loginPostCall("https://goli-soda-services.herokuapp.com/api/user/login", newFormData);
         }
     }
 
@@ -57,6 +62,17 @@ class LoginPage extends React.Component {
     render() {
         return (
             <div className="landing-page-container loginpage">
+                {
+                    this.state.showSpinner ? <div className="spinner-backround">&nbsp;</div> : null
+                }
+                <div className="in-house-spinner">
+                    <FadeLoader
+                        color={'#0E2B8A'}
+                        sizeUnit={"px"}
+                        size={150}
+                        loading={this.state.showSpinner}
+                    />
+                </div>
                 <div className="navigation-bar">
                     <div className="header-text"><span className="first">Kannan&nbsp;</span><span className="second">Soda</span></div>
                 </div>
@@ -67,7 +83,7 @@ class LoginPage extends React.Component {
                             <div className="bk"></div>
                             <Modal.Title>Login</Modal.Title>
                         </Modal.Header>
-                        {this.props.errorMessage?<div className="login-error">{this.props.errorMessage}</div>:null}
+                        {this.props.errorMessage ? <div className="login-error">{this.props.errorMessage}</div> : null}
                         <Modal.Body>
                             {/* <ValidationForm onSubmit={this.handleSubmit} onErrorSubmit={this.handleErrorSubmit}> */}
                             <ValidationForm onSubmit={this.handleSubmit}>

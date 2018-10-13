@@ -63,6 +63,24 @@ class InHousePage extends React.Component {
     }
 
     componentWillMount() {
+
+        // if (this.dialog) {
+        //     this.dialog.show({
+        //         body: this.state.showMessage ? this.state.showMessage : "Data Saved Successfuly.",
+        //         bsSize: "small",
+        //         actions: [
+        //             Dialog.OKAction((dialog) => {
+        //                 dialog.hide()
+        //                 this.setState({ showSpinner: false });
+        //             })
+        //         ],
+        //         onHide: (dialog) => {
+        //             dialog.hide()
+        //             this.setState({ showSpinner: false });
+        //         }
+        //     })
+        // }
+
         // let rowData = [
         //     { "id": 1, "date": "11/27/2017", "day": "Monday", "bottleType": "crown cap 200ml", "rate": "6", "bottleCount": "5,280", "empCount": "7", "empCost": "1400", "totalCost": "31680" },
         //     { "id": 2, "date": "11/27/2017", "day": "Monday", "bottleType": "goli colour", "rate": "6", "bottleCount": "5,280", "empCount": "7", "empCost": "1400", "totalCost": "31680" },
@@ -240,25 +258,13 @@ class InHousePage extends React.Component {
                 if (!_.isEmpty(newObjects)) {
                     newObjects.map((obj) => {
                         delete obj.s_no;
+                        delete obj._id;
                     });
                     this.props.inHousePageActions.saveInHouseData(SaveURL, { inhousedata: newObjects }, this.props.token);
                 }
                 this.props.inHousePageActions.updateInHousePageGridData(this.state.rowData);
             }
-            this.dialog.show({
-                body: this.state.showMessage ? this.state.showMessage : "Data Saved Successfuly.",
-                bsSize: "small",
-                actions: [
-                    Dialog.OKAction((dialog) => {
-                        dialog.hide()
-                        this.setState({ showSpinner: false });
-                    })
-                ],
-                onHide: (dialog) => {
-                    dialog.hide()
-                    this.setState({ showSpinner: false });
-                }
-            })
+
         }
     }
     onCreateRow = () => {
@@ -359,7 +365,11 @@ class InHousePage extends React.Component {
         return (
             <div className="in-house-container">
                 <Dialog ref={(el) => { this.dialog = el }} />
-                <div className="nav-title"><h4 className="nav-title-text">IN HOUSE DATA :</h4></div>
+                <div className="nav-title">
+                    <h4 className="nav-title-text">IN HOUSE DATA :</h4>
+                    <button className="btn btn-sm btn-primary buttons-logout">
+                        <i class="fas fa-sync-alt"></i>Refresh</button>
+                </div>
                 {
                     this.state.showSpinner ? <div className="spinner-backround">&nbsp;</div> : null
                 }
@@ -390,11 +400,11 @@ class InHousePage extends React.Component {
                         }}
                     />
                     <button className="btn btn-sm btn-success buttons" onClick={this.onClickSave}>
-                        <i className="glyphicon glyphicon-floppy-disk"></i>Save Data</button>
+                        <i className="fas fa-save"></i>Save Data</button>
                     <button className="btn btn-sm btn-primary buttons" onClick={this.onCreateRow}>
-                        <i className="glyphicon glyphicon-plus"></i>Create Row</button>
+                        <i className="fas fa-plus-circle"></i>Create Row</button>
                     <button className="btn btn-sm btn-primary buttons" onClick={this.onClearRow}>
-                        <i className="glyphicon glyphicon-refresh"></i>Clear Row</button>
+                        <i className="fas fa-minus-circle"></i>Clear Row</button>
                     {this.state.showClearRowInput ?
                         <input
                             type="number"
@@ -404,7 +414,7 @@ class InHousePage extends React.Component {
                         />
                         : null}
                     <button className="btn btn-sm btn-primary buttons" onClick={this.onDeleteRow}>
-                        <i className="glyphicon glyphicon-remove"></i>Delete Row</button>
+                        <i className="fas fa-trash-alt"></i>Delete Row</button>
                     {this.state.showDeleteRowInput ?
                         <input
                             type="number"
@@ -415,9 +425,9 @@ class InHousePage extends React.Component {
                         null}
                     <button className="btn btn-sm btn-primary buttons" data-toggle="tooltip" data-animation="true"
                         data-placement="top" title="Undo" onClick={this.onUndoClick} disabled={_.isEmpty(this.state.undoStack) ? true : false}>
-                        <i className="glyphicon glyphicon-arrow-left"></i>Undo</button>
+                        <i className="fas fa-undo"></i>Undo</button>
                     <button className="btn btn-sm btn-primary buttons" onClick={this.onRedoClick} disabled={_.isEmpty(this.state.redoStack) ? true : false}>
-                        <i className="glyphicon glyphicon-arrow-right" data-toggle="tooltip"
+                        <i className="fas fa-redo" data-toggle="tooltip"
                             data-delay={{ "show": 1000, "hide": 100 }} data-animation="true" data-placement="top" title="Redo"></i>Redo</button>
                 </div>
 
