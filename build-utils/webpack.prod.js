@@ -59,11 +59,11 @@ const config = {
         }]
       },
       {
-        test: /\.(png|jp(e*)g|svg)$/,
+        test: /\.(png|woff|woff2|eot|ttf|svg)$/,
         use: [{
           loader: 'url-loader',
           options: {
-            limit: 8000, // Convert images < 8kb to base64 strings
+            limit: 100000, // Convert images < 8kb to base64 strings
             name: 'images/[hash]-[name].[ext]'
           }
         }]

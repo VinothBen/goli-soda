@@ -4,7 +4,7 @@ const initialState = {
     columnConfig: [],
     initialGridData: [],
     updatedGridData: [],
-    showSpinner: true,
+    showSpinner: false,
     showPopUpModel: false,
     popUpMessage: "",
     searchDetailsByDate: [],

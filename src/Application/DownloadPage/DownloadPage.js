@@ -23,9 +23,70 @@ class DownloadPage extends React.Component {
             showDateWarning: false,
             showSpinner: false,
             columnConfigDetails2: [],
-            rowDataDetails2: []
+            rowDataDetails2: [],
+            inHouseData: []
         };
         this.bottleTypes = [];
+        this.rowData = [
+            { "id": 1, "date": "", "day": "", "total-bottles": "", "bottles-producedfor": "", "employee-cost": "" }
+        ];
+        this.rowDataDetails2 = [
+            {
+                "crown cap 200ml": "",
+                "crown cap 250ml": "",
+                "goli colour": "",
+                "goli soda": "",
+                "day": "",
+                "id": 1
+            }
+        ];
+        this.inHousePageColumnConfig = [
+            {
+                key: 's_no',
+                name: 'S.NO',
+                width: 50
+            },
+            {
+                key: 'date',
+                name: 'DATE',
+                editable: true
+            },
+            {
+                key: 'day',
+                name: 'DAY',
+                editor: this.DaysDropDownValue
+            },
+            {
+                key: 'bottle_type',
+                name: 'BOTTLE TYPE',
+                editor: this.BottleType
+            },
+            {
+                key: 'rate',
+                name: 'RATE',
+                editable: true
+            },
+            {
+                key: 'no_of_bottles',
+                name: 'NO.OF.BOTTLES',
+                editable: true
+            },
+            {
+                key: 'employee_involved',
+                name: 'EMPLOYEE-INVOLVED',
+                editable: true
+            },
+            {
+                key: 'employee_cost',
+                name: 'EMPLOYEE-COST',
+                editable: true
+            },
+            {
+                key: 'bottles_for_cost',
+                name: 'BOTTLES FOR COST',
+                editable: true
+            }
+        ];
     }
     componentWillMount() {
         if (!_.isEmpty(this.props) && !this.props.username && !this.props.token) {
@@ -34,12 +95,6 @@ class DownloadPage extends React.Component {
         // if(!_.isEmpty(this.props.searchDetailsByDate) && _.has(this.props, "searchDetailsByDate[0].inHouseData")){
         //     this.setState({showSpinner: false});
         // }
-        let rowData = [
-            { "id": 1, "date": "", "day": "", "total-bottles": "", "bottles-producedfor": "", "employee-cost": "" },
-            { "id": 2, "date": "", "day": "", "total-bottles": "", "bottles-producedfor": "", "employee-cost": "" },
-            { "id": 3, "date": "", "day": "", "total-bottles": "", "bottles-producedfor": "", "employee-cost": "" },
-            { "id": 4, "date": "", "day": "", "total-bottles": "", "bottles-producedfor": "", "employee-cost": "" }
-        ];
         let columnsConfig = [
             {
                 key: 'id',
@@ -116,43 +171,10 @@ class DownloadPage extends React.Component {
                 "editable": false
             }
         ];
-        let rowDataDetails2 = [
-            {
-                "crown cap 200ml": "",
-                "crown cap 250ml": "",
-                "goli colour": "",
-                "goli soda": "",
-                "day": "",
-                "id": 1
-            },
-            {
-                "crown cap 200ml": "",
-                "crown cap 250ml": "",
-                "goli colour": "",
-                "goli soda": "",
-                "day": "",
-                "id": 2
-            },
-            {
-                "crown cap 200ml": "",
-                "crown cap 250ml": "",
-                "goli colour": "",
-                "goli soda": "",
-                "day": "",
-                "id": 3
-            },
-            {
-                "crown cap 200ml": "",
-                "crown cap 250ml": "",
-                "goli colour": "",
-                "goli soda": "",
-                "day": "",
-                "id": 4
-            }
-        ];
-        this.setState({ rowData, columnsConfig, columnConfigDetails2 });
+        this.setState({ rowData: this.rowData, columnsConfig, columnConfigDetails2, rowDataDetails2: this.rowDataDetails2 });
         if (!_.isEmpty(this.props.searchDetailsByDate)) {
             if (_.has(this.props, "searchDetailsByDate[0].inHouseData")) {
+                this.setState({inHouseData: _.get(this.props, "searchDetailsByDate[0].inHouseData")});
                 this.constructGridData(_.get(this.props, "searchDetailsByDate[0].inHouseData"));
             }
         }
@@ -165,8 +187,12 @@ class DownloadPage extends React.Component {
         }
         if (!_.isEmpty(nextProps.searchDetailsByDate) && !_.isEqual(this.props.searchDetailsByDate, nextProps.searchDetailsByDate)) {
             if (_.has(nextProps, "searchDetailsByDate[0].inHouseData")) {
+                this.setState({inHouseData: _.get(nextProps, "searchDetailsByDate[0].inHouseData")});
                 this.constructGridData(_.get(nextProps, "searchDetailsByDate[0].inHouseData"));
             }
+        }
+        if(nextProps.searchErrorMessage.message){
+            this.setState({rowData: this.rowData, rowDataDetails2: this.rowDataDetails2});
         }
     }
     constructGridData = (data) => {
@@ -312,10 +338,13 @@ class DownloadPage extends React.Component {
                                     <button className="btn btn-sm btn-primary button-download">
                                         <i className="fas fa-download"></i>Download ExcelData</button>
                                 }>
-                                <Workbook.Sheet data={this.state.rowData ? this.state.rowData : []} name="InHouseData">
+                                <Workbook.Sheet data={this.state.inHouseData ? this.state.inHouseData : []} name="In House Data">
+                                    {!_.isEmpty(this.inHousePageColumnConfig) ? this.getWorkBookDetails(this.inHousePageColumnConfig) : null}
+                                </Workbook.Sheet>
+                                <Workbook.Sheet data={this.state.rowData ? this.state.rowData : []} name="Details 1">
                                     {!_.isEmpty(this.state.columnsConfig) ? this.getWorkBookDetails(this.state.columnsConfig) : null}
                                 </Workbook.Sheet>
-                                <Workbook.Sheet data={this.state.rowDataDetails2 ? this.state.rowDataDetails2 : []} name="InHouseData2">
+                                <Workbook.Sheet data={this.state.rowDataDetails2 ? this.state.rowDataDetails2 : []} name="Details 2">
                                     {!_.isEmpty(this.state.columnConfigDetails2) ? this.getWorkBookDetails(this.state.columnConfigDetails2) : null}
                                 </Workbook.Sheet>
                             </Workbook>

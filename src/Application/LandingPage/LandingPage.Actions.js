@@ -10,6 +10,12 @@ export const landingPageActionCheck = (data) => {
     };
 }
 
+export const logOutOption = () => {
+    return {
+        type: LandingPageConstants.LOGOUT_OPTION,
+    };
+}
+
 export const loginSuccess = (data) => {
     return {
         type: LandingPageConstants.LOGIN_SUCCESS,

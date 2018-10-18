@@ -6,7 +6,7 @@
     -->
     <modelVersion>4.0.0</modelVersion>
     <groupId>it.megadix</groupId>
-    <artifactId>Kolli-soda</artifactId>
+    <artifactId>Kannan-soda</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>war</packaging>
 
@@ -135,7 +135,7 @@
                         <version>1.3.2</version>
                         <configuration>
                             <environmentVariables>
-                                <PUBLIC_URL>http://property-buy-center/${project.artifactId}</PUBLIC_URL>
+                                <PUBLIC_URL>http://kannan-soda/${project.artifactId}</PUBLIC_URL>
                                 <REACT_APP_ROUTER_BASE>/${project.artifactId}</REACT_APP_ROUTER_BASE>
                             </environmentVariables>
                         </configuration>

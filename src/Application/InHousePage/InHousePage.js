@@ -7,7 +7,9 @@ import { FadeLoader } from 'react-spinners';
 import Dialog from 'react-bootstrap-dialog'
 import index from "react-excel-workbook";
 import { hashHistory } from "react-router";
-
+import { NotificationContainer, NotificationManager } from 'react-notifications';
+import 'react-notifications/lib/notifications.css';
+import moment from "moment";
 
 const { AutoComplete: AutoCompleteEditor } = Editors;
 // const days = [
@@ -236,7 +238,16 @@ class InHousePage extends React.Component {
     };
 
     handleGridRowsUpdated = ({ fromRow, toRow, updated }) => {
-        if (!_.isEmpty(this.state.rowData)) {
+        let isValidDate = true;
+        console.log("...onChange", fromRow, toRow, updated);
+        try {
+            if (!_.isEmpty(updated) && updated.date) {
+                isValidDate = moment(updated.date, "MM-DD-YY").isValid();
+            }
+        } catch (err) {
+            NotificationManager.info(err.message, 'Message', 2000);
+        }
+        if (!_.isEmpty(this.state.rowData) && isValidDate) {
             let rowData = this.state.rowData.slice();
             for (let i = fromRow; i <= toRow; i++) {
                 let rowToUpdate = rowData[i];
@@ -244,6 +255,8 @@ class InHousePage extends React.Component {
                 rowData[i] = updatedRow;
             }
             this.setState({ rowData });
+        } else {
+            NotificationManager.error('Invalid Date/Date Format.', 'Message', 2000);
         }
     };
 
@@ -264,7 +277,7 @@ class InHousePage extends React.Component {
                 }
                 this.props.inHousePageActions.updateInHousePageGridData(this.state.rowData);
             }
-
+            NotificationManager.success('Data Saved Successfully.', 'Message', 2000);
         }
     }
     onCreateRow = () => {
@@ -361,13 +374,22 @@ class InHousePage extends React.Component {
             return excelComponents;
         }
     }
+    onClickRefresh = () => {
+        if (!_.isEmpty(this.props.token)) {
+            // let URL = "http://localhost:3010/api/inhouse-getdata";
+            let URL = "https://goli-soda-services.herokuapp.com/api/inhouse-getdata";
+            this.props.inHousePageActions.updateInHousePageGridData([]);
+            this.props.inHousePageActions.getInHousePageDetails(URL, this.props.token.toString());
+        }
+    }
     render() {
         return (
             <div className="in-house-container">
                 <Dialog ref={(el) => { this.dialog = el }} />
+                <NotificationContainer />
                 <div className="nav-title">
                     <h4 className="nav-title-text">IN HOUSE DATA :</h4>
-                    <button className="btn btn-sm btn-primary buttons-logout">
+                    <button className="btn btn-sm btn-primary buttons-logout" onClick={() => this.onClickRefresh()}>
                         <i class="fas fa-sync-alt"></i>Refresh</button>
                 </div>
                 {

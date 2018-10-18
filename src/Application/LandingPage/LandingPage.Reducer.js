@@ -17,6 +17,12 @@ function LandingPage(state = initialState, action) {
                 username: action.data.user.username,
                 errorMessage: null
             });
+        case LandingPageConstants.LOGOUT_OPTION:
+            return Object.assign({}, state, {
+                token: "",
+                username: "",
+                errorMessage: null
+            });
         case LandingPageConstants.LOGIN_FAILURE:
             return Object.assign({}, state, { errorMessage: action.data, token: "", username: "" });
         default:

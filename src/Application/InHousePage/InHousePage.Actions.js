@@ -55,6 +55,7 @@ export const getInHousePageDetailsFailure = () => {
 
 export const getInHousePageDetails = (url, tokenValue) => {
     return (dispatch) => {
+        dispatch(showInHouseSpinner(true));
         url = decodeURIComponent(url);
         let headerValue = {
             method: 'GET',
