@@ -4,7 +4,6 @@ import { Editors } from 'react-data-grid-addons';
 import update from 'immutability-helper';
 import Workbook from 'react-excel-workbook';
 import { FadeLoader } from 'react-spinners';
-import Dialog from 'react-bootstrap-dialog'
 import index from "react-excel-workbook";
 import { hashHistory } from "react-router";
 import { NotificationContainer, NotificationManager } from 'react-notifications';
@@ -65,24 +64,6 @@ class InHousePage extends React.Component {
     }
 
     componentWillMount() {
-
-        // if (this.dialog) {
-        //     this.dialog.show({
-        //         body: this.state.showMessage ? this.state.showMessage : "Data Saved Successfuly.",
-        //         bsSize: "small",
-        //         actions: [
-        //             Dialog.OKAction((dialog) => {
-        //                 dialog.hide()
-        //                 this.setState({ showSpinner: false });
-        //             })
-        //         ],
-        //         onHide: (dialog) => {
-        //             dialog.hide()
-        //             this.setState({ showSpinner: false });
-        //         }
-        //     })
-        // }
-
         // let rowData = [
         //     { "id": 1, "date": "11/27/2017", "day": "Monday", "bottleType": "crown cap 200ml", "rate": "6", "bottleCount": "5,280", "empCount": "7", "empCost": "1400", "totalCost": "31680" },
         //     { "id": 2, "date": "11/27/2017", "day": "Monday", "bottleType": "goli colour", "rate": "6", "bottleCount": "5,280", "empCount": "7", "empCost": "1400", "totalCost": "31680" },
@@ -100,42 +81,51 @@ class InHousePage extends React.Component {
                 {
                     key: 'date',
                     name: 'DATE',
-                    editable: true
+                    editable: true,
+                    format: "date"
                 },
                 {
                     key: 'day',
                     name: 'DAY',
-                    editor: this.DaysDropDownValue
+                    editor: this.DaysDropDownValue,
+                    format: "string"
                 },
                 {
                     key: 'bottle_type',
                     name: 'BOTTLE TYPE',
-                    editor: this.BottleType
+                    editor: this.BottleType,
+                    format: "string"
                 },
                 {
                     key: 'rate',
                     name: 'RATE',
-                    editable: true
+                    editable: true,
+                    format: "number"
                 },
                 {
                     key: 'no_of_bottles',
                     name: 'NO.OF.BOTTLES',
-                    editable: true
+                    editable: true,
+                    format: "number"
+
                 },
                 {
                     key: 'employee_involved',
                     name: 'EMPLOYEE-INVOLVED',
-                    editable: true
+                    editable: true,
+                    format: "number"
                 },
                 {
                     key: 'employee_cost',
                     name: 'EMPLOYEE-COST',
-                    editable: true
+                    editable: true,
+                    format: "number"
                 },
                 {
                     key: 'bottles_for_cost',
                     name: 'BOTTLES FOR COST',
-                    editable: true
+                    editable: true,
+                    format: "number"
                 }
             ];
             // this.setState({ columnsConfig });
@@ -238,16 +228,25 @@ class InHousePage extends React.Component {
     };
 
     handleGridRowsUpdated = ({ fromRow, toRow, updated }) => {
-        let isValidDate = true;
-        console.log("...onChange", fromRow, toRow, updated);
+        let isValidData = false;
+        // ****** Add validation for all Data *****//
         try {
-            if (!_.isEmpty(updated) && updated.date) {
-                isValidDate = moment(updated.date, "MM-DD-YY").isValid();
+            if (!_.isEmpty(updated) && Object.keys(updated).length != 0) {
+                let columnObject = _.find(this.state.columnsConfig, { "key": Object.keys(updated)[0].toString() });
+                if (!_.isEmpty(columnObject) && columnObject.format === "number") {
+                    isValidData = !(Number.isNaN(Number.parseInt(updated[columnObject.key])));
+                }
+                if (!_.isEmpty(updated) && columnObject.format === "date") {
+                    isValidData = moment(updated[columnObject.key], "MM-DD-YY", true).isValid();
+                }
+                if (!_.isEmpty(updated) && columnObject.format === "string") {
+                    isValidData = true;
+                }
             }
         } catch (err) {
-            NotificationManager.info(err.message, 'Message', 2000);
+            NotificationManager.info(err.message, 'Message', 4000);
         }
-        if (!_.isEmpty(this.state.rowData) && isValidDate) {
+        if (!_.isEmpty(this.state.rowData) && isValidData) {
             let rowData = this.state.rowData.slice();
             for (let i = fromRow; i <= toRow; i++) {
                 let rowToUpdate = rowData[i];
@@ -256,28 +255,40 @@ class InHousePage extends React.Component {
             }
             this.setState({ rowData });
         } else {
-            NotificationManager.error('Invalid Date/Date Format.', 'Message', 2000);
+            NotificationManager.error('Invalid Date/Data Format.', 'Message', 4000);
         }
     };
 
     onClickSave = () => {
         if (!_.isEmpty(this.props) && this.props.username && this.props.username) {
             let newObjects = [];
-            let SaveURL = "http://localhost:3010/api/inhouse-savedata";
-            // let SaveURL = "https://goli-soda-services.herokuapp.com/api/inhouse-savedata";
+            // let SaveURL = "http://localhost:3010/api/inhouse-savedata";
+            let SaveURL = "https://goli-soda-services.herokuapp.com/api/inhouse-savedata";
             let rowData = _.cloneDeep(this.state.rowData);
             if (!_.isEmpty(rowData) && rowData.length > 5 && !_.isEqual(rowData, this.props.updatedGridData)) {
                 newObjects = _.differenceWith(rowData, this.props.updatedGridData, (obj1, obj2) => { return obj1.s_no === obj2.s_no });
                 if (!_.isEmpty(newObjects)) {
+                    let isDateEmpty = false;
                     newObjects.map((obj) => {
                         delete obj.s_no;
                         delete obj._id;
                     });
-                    this.props.inHousePageActions.saveInHouseData(SaveURL, { inhousedata: newObjects }, this.props.token);
+                    for (var i = 0; i < newObjects.length; i++) {
+                        if (newObjects[i].date === "") {
+                            isDateEmpty = (newObjects[i].date === "");
+                            break;
+                        }
+                    }
+                    if (!isDateEmpty) {
+                        // console.log("...");
+                        this.props.inHousePageActions.saveInHouseData(SaveURL, { inhousedata: newObjects }, this.props.token);
+                        NotificationManager.success('Data Saved Successfully.', 'Message', 3000);
+                    } else {
+                        NotificationManager.error('Date fields should not be empty.', 'Message', 4000);
+                    }
                 }
                 this.props.inHousePageActions.updateInHousePageGridData(this.state.rowData);
             }
-            NotificationManager.success('Data Saved Successfully.', 'Message', 2000);
         }
     }
     onCreateRow = () => {
@@ -385,7 +396,6 @@ class InHousePage extends React.Component {
     render() {
         return (
             <div className="in-house-container">
-                <Dialog ref={(el) => { this.dialog = el }} />
                 <NotificationContainer />
                 <div className="nav-title">
                     <h4 className="nav-title-text">IN HOUSE DATA :</h4>

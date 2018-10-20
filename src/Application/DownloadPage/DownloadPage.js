@@ -174,7 +174,7 @@ class DownloadPage extends React.Component {
         this.setState({ rowData: this.rowData, columnsConfig, columnConfigDetails2, rowDataDetails2: this.rowDataDetails2 });
         if (!_.isEmpty(this.props.searchDetailsByDate)) {
             if (_.has(this.props, "searchDetailsByDate[0].inHouseData")) {
-                this.setState({inHouseData: _.get(this.props, "searchDetailsByDate[0].inHouseData")});
+                this.setState({ inHouseData: _.get(this.props, "searchDetailsByDate[0].inHouseData") });
                 this.constructGridData(_.get(this.props, "searchDetailsByDate[0].inHouseData"));
             }
         }
@@ -187,12 +187,12 @@ class DownloadPage extends React.Component {
         }
         if (!_.isEmpty(nextProps.searchDetailsByDate) && !_.isEqual(this.props.searchDetailsByDate, nextProps.searchDetailsByDate)) {
             if (_.has(nextProps, "searchDetailsByDate[0].inHouseData")) {
-                this.setState({inHouseData: _.get(nextProps, "searchDetailsByDate[0].inHouseData")});
+                this.setState({ inHouseData: _.get(nextProps, "searchDetailsByDate[0].inHouseData") });
                 this.constructGridData(_.get(nextProps, "searchDetailsByDate[0].inHouseData"));
             }
         }
-        if(nextProps.searchErrorMessage.message){
-            this.setState({rowData: this.rowData, rowDataDetails2: this.rowDataDetails2});
+        if (nextProps.searchErrorMessage.message) {
+            this.setState({ rowData: this.rowData, rowDataDetails2: this.rowDataDetails2 });
         }
     }
     constructGridData = (data) => {
@@ -202,12 +202,15 @@ class DownloadPage extends React.Component {
         // **********construct data for grid  ********
         data.map((obj) => {
             value.push({
-                rate: obj.rate ? parseInt(obj.rate) : 0,
+                rate: obj.rate ? !(Number.isNaN(Number.parseInt(obj.rate))) ?
+                    parseInt(obj.rate) : 0 : 0,
                 bottleType: obj.bottle_type ? obj.bottle_type : "",
-                noOfBottles: obj.no_of_bottles ? parseInt(obj.no_of_bottles) : 0,
+                noOfBottles: obj.no_of_bottles ? !(Number.isNaN(Number.parseInt(obj.no_of_bottles))) ?
+                    parseInt(obj.no_of_bottles) : 0 : 0,
                 day: obj.day ? obj.day : "",
                 date: obj.date ? obj.date : "",
-                employeeCost: obj.employee_cost ? parseInt(obj.employee_cost) : 0
+                employeeCost: obj.employee_cost ? !(Number.isNaN(Number.parseInt(obj.employee_cost))) ?
+                    parseInt(obj.employee_cost) : 0 : 0
             });
         });
         // **********construct columnConfig for grid 2 ********
@@ -244,17 +247,17 @@ class DownloadPage extends React.Component {
         let objValue = _.reduce(Object.keys(groupValue), function (o, v) { return o[v] = 0, o; }, {});
         let resultData = _.reduce(groupValue, function (obj, val, key) { obj[key] += val[0].noOfBottles; return obj }, objValue);
         rowDataDetails2.push({ ...resultData, "day": value[0].day, "id": 1 });
-        let totalBottles = _.reduce(value, function (obj, val, key) {obj.sum += val.noOfBottles; return obj }, {sum: 0});
-        let bottleProducedFor = _.reduce(value, function (obj, val, key) {obj.sum += parseInt(val.noOfBottles * val.rate); return obj }, {sum: 0});
-        let emplyeeCost = _.reduce(value, function (obj, val, key) {obj.sum += val.employeeCost; return obj }, {sum: 0});
+        let totalBottles = _.reduce(value, function (obj, val, key) { obj.sum += val.noOfBottles; return obj }, { sum: 0 });
+        let bottleProducedFor = _.reduce(value, function (obj, val, key) { obj.sum += parseInt(val.noOfBottles * val.rate); return obj }, { sum: 0 });
+        let emplyeeCost = _.reduce(value, function (obj, val, key) { obj.sum += val.employeeCost; return obj }, { sum: 0 });
         rowData.push({
-                "id": 1,
-                "date": value[0].date,
-                "day": value[0].day,
-                "total-bottles": totalBottles.sum?totalBottles.sum:0,
-                "bottles-producedfor": bottleProducedFor.sum?bottleProducedFor.sum:0,
-                "employee-cost": emplyeeCost.sum?emplyeeCost.sum:0
-            });
+            "id": 1,
+            "date": value[0].date,
+            "day": value[0].day,
+            "total-bottles": totalBottles.sum ? totalBottles.sum : 0,
+            "bottles-producedfor": bottleProducedFor.sum ? bottleProducedFor.sum : 0,
+            "employee-cost": emplyeeCost.sum ? emplyeeCost.sum : 0
+        });
 
         this.setState({ rowData, rowDataDetails2 });
     }
