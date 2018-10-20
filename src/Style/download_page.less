@@ -92,11 +92,24 @@
             .button-download{
                 float: right;
                 position: relative;
-                right: 70px;
+                right: 100px;
             }
             h4{
                 float: left;
             }
+        }
+        .charview-button {
+            float: right;
+            position: relative;
+            right: 85px;
+            width: 100px;
+            height: 28px;
+            padding: 0px;
+            background-color: #007bff;
+            color: #fff;
+        }
+        .fa, .fas {
+            margin-right: 10px;
         }
     }
     .datagrid-container-2 {
@@ -131,5 +144,30 @@
         z-index: 99999;
         left: 50%;
         top: 35%;
+    }
+    .modal-dialog {
+        top: 20px;
+        .modal-body {
+            padding: 0px;
+            height: 220px;
+            .piechart-view {
+                // height: 100%;
+                position: relative;
+                // left: 35px;
+                // width: 100%;
+                .chart-pie {
+                    float: left;
+                    height: 100%;
+                    width: 50%;
+                    left: 15px;
+                    position: relative;
+                    bottom: 15px;
+                }
+                .chart-legend {
+                    position: absolute;
+                    width: 100%;
+                }
+            }
+        }  
     }
 }

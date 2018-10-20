@@ -4,9 +4,10 @@ import 'react-daterange-picker/dist/css/react-calendar.css' // For some basic st
 import ReactDataGrid from 'react-data-grid';
 // import update from 'immutability-helper';
 import { FadeLoader } from 'react-spinners';
-import Dialog from 'react-bootstrap-dialog';
 import Workbook from 'react-excel-workbook';
 import { hashHistory } from "react-router";
+import { VictoryChart, VictoryLegend, VictoryPie, VictoryTooltip } from "victory";
+import { Modal, Button } from "react-bootstrap";
 
 class DownloadPage extends React.Component {
     constructor(props) {
@@ -24,7 +25,10 @@ class DownloadPage extends React.Component {
             showSpinner: false,
             columnConfigDetails2: [],
             rowDataDetails2: [],
-            inHouseData: []
+            inHouseData: [],
+            showModel: false,
+            pieChartData: [],
+            pieChartLegendData: []
         };
         this.bottleTypes = [];
         this.rowData = [
@@ -87,6 +91,7 @@ class DownloadPage extends React.Component {
                 editable: true
             }
         ];
+        this.colorOptions = ["navy", "orange", "gold", "cyan", "tomato", "lightgreen"];
     }
     componentWillMount() {
         if (!_.isEmpty(this.props) && !this.props.username && !this.props.token) {
@@ -258,9 +263,27 @@ class DownloadPage extends React.Component {
             "bottles-producedfor": bottleProducedFor.sum ? bottleProducedFor.sum : 0,
             "employee-cost": emplyeeCost.sum ? emplyeeCost.sum : 0
         });
-
+        if (!_.isEmpty(rowDataDetails2) && Object.keys(groupValue).length !== 0) {
+            this.constructVictryPieData(rowDataDetails2, Object.keys(groupValue));
+        }
         this.setState({ rowData, rowDataDetails2 });
     }
+    constructVictryPieData = (rowData, keyObjects) => {
+        let pieChartData = [], pieChartLegendData = [];
+        keyObjects.map((obj, index) => {
+            if (rowData[0][obj] > 0) {
+                pieChartData.push({
+                    x: rowData[0][obj] ? rowData[0][obj].toString() : "",
+                    y: rowData[0][obj]
+                });
+                pieChartLegendData.push({
+                    name: obj,
+                    symbol: { fill: this.colorOptions[(pieChartData.length-1)], type: "circle" }
+                })
+            }
+        });
+        this.setState({ pieChartData, pieChartLegendData });
+        }
     rowGetter = (i) => {
         return this.state.rowData[i] ? this.state.rowData[i] : {};
     };
@@ -303,6 +326,68 @@ class DownloadPage extends React.Component {
                 {
                     this.props.showDownaloadPageSpinner ? <div className="spinner-backround">&nbsp;</div> : null
                 }
+                <div>
+                    <Modal
+                        show={this.state.showModel}
+                        onHide={() => this.setState({ showModel: false })}
+                        container={this}
+                        aria-labelledby="contained-modal-title"
+                        animation={false}
+                    >
+                        <Modal.Header closeButton>
+                            <Modal.Title id="contained-modal-title">
+                                Pie Chart View
+                            </Modal.Title>
+                        </Modal.Header>
+                        <Modal.Body>
+                            <div className="piechart-view">
+                                <div className="chart-pie">
+                                    <VictoryPie
+                                        data={this.state.pieChartData}
+                                        colorScale={this.colorOptions}
+                                        width={270}
+                                        height={270}
+                                    />
+                                </div>
+                                <div className="chart-legend">
+                                    <VictoryLegend
+                                        x={280} y={35}
+                                        orientation="vertical"
+                                        data={this.state.pieChartLegendData}
+                                    />
+                                </div>
+                            </div>
+                            {/* <div>
+                                <VictoryPie
+                                    data={[
+                                        { x: 1, y: 2, label: "one" },
+                                        { x: 2, y: 3, label: "two" },
+                                        { x: 3, y: 5, label: "three" }
+                                    ]}
+                                    colorScale={["tomato", "orange", "gold", "cyan", "navy"]}
+                                    width={200}
+                                    height={200}
+                                    labelComponent={
+                                        <VictoryTooltip
+                                            cornerRadius={0}
+                                            pointerLength={0}
+                                            width={25}
+                                            height={10}
+                                            flyoutStyle={{
+                                                stroke: "none",
+                                                fill: "white"
+                                            }}
+                                        />}
+
+                                >
+                                </VictoryPie>
+                            </div> */}
+                        </Modal.Body>
+                        <Modal.Footer>
+                            <Button style={{ zIndex: 99 }} onClick={() => this.setState({ showModel: false })}>Close</Button>
+                        </Modal.Footer>
+                    </Modal>
+                </div>
                 <div className="in-house-spinner">
                     <FadeLoader
                         color={'#0E2B8A'}
@@ -333,6 +418,8 @@ class DownloadPage extends React.Component {
                     <div className="search-warning"><h4>{this.props.searchErrorMessage.message}</h4></div> : null}
                 <div className="datagrid-container-1">
                     <div className="grid-header-name"><h4>Details 1:</h4>
+                        <button className="btn btn-sm btn-primary charview-button" onClick={() => this.setState({ showModel: true })}>
+                            <i className="fas fa-chart-pie"></i>Chart View</button>
                         {/* <button className="btn btn-sm btn-primary button-download">
                             <i className="glyphicon glyphicon-download-alt"></i>Download ExcelData</button> */}
                         <div>
