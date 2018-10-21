@@ -47,8 +47,11 @@ class SupplyPage extends React.Component {
         this.columnsConfig = [];
      }
 
-     componentWillMount(){
-        const url = "http://localhost:3010/api/getSupplyData"
+     componentWillMount(){        
+        const url = "http://localhost:3010/api/getSupplyData";
+        if (_.isEmpty(this.props.initialGridData)) {
+            this.props.actions.getSupplyPageDetails(url);
+       }
         
         this.columnsConfig = [
             {
@@ -118,19 +121,10 @@ class SupplyPage extends React.Component {
                 format: "number"
             }
         ];
-        if (this.props.showSpinner) {
-            this.setState({ showSpinner: true });
-        } else {
-            this.setState({ showSpinner: false });
-        }
 
         if (_.isEmpty(this.props.columnConfig)) {
             this.props.actions.supplyColumnConfig(this.columnsConfig);
         }
-
-        if (_.isEmpty(this.props.initialGridData)) {
-            this.props.actions.getSupplyPageDetails(url);
-       }
 
         if (!_.isEmpty(this.props.initialGridData) && !_.isEmpty(this.props.columnConfig) &&  _.isEmpty(this.props.updatedGridData)) {
             let sortedGridData = _.sortBy(this.props.initialGridData, 'id');
@@ -156,41 +150,38 @@ class SupplyPage extends React.Component {
         }        
     }
 
-//     componentWillReceiveProps(nextProps) {
-//         // console.log("...nextProps inhouse", nextProps);
-//         if (!_.isEmpty(nextProps)) {
-//             hashHistory.push("/login");
-//         } else {
-//             if (nextProps.showSpinner) {
-//                 this.setState({ showSpinner: true });
-//             } else {
-//                 this.setState({ showSpinner: false });
-//             }
-//             if (!_.isEmpty(nextProps.initialGridData) && !_.isEmpty(nextProps.columnConfig) && _.isEmpty(nextProps.updatedGridData)) {
-//                 let sortedGridData = _.sortBy(nextProps.initialGridData, 'id');
-//                 if (sortedGridData.length > 5) {
-//                     let newGridData = sortedGridData.slice(Math.max(sortedGridData.length - 5, 1));
-//                     newGridData.map((obj, index) => {
-//                         obj.s_no = index + 1;
-//                     });
-//                     this.setState({ rowData: newGridData, columnsConfig: nextProps.columnConfig });
-//                     this.props.actions.updateSupplyPageGridData(newGridData);
-//                 } else {
-//                     sortedGridData.map((obj, index) => {
-//                         obj.s_no = index + 1;
-//                     });
-//                     this.setState({ rowData: sortedGridData, columnsConfig: nextProps.columnConfig });
-//                     this.props.actions.updateSupplyPageGridData(sortedGridData);
-//                 }
-//             }
-//             if (!_.isEmpty(nextProps.columnConfig) && !_.isEmpty(nextProps.updatedGridData) && !_.isEqual(this.props.updatedGridData, nextProps.updatedGridData)) {
-//                 let sortedGridData = _.sortBy(nextProps.updatedGridData, 'id');
-//                 this.setState({ rowData: sortedGridData, columnsConfig: nextProps.columnConfig });
-//                 this.props.actions.updateSupplyPageGridData(sortedGridData);
-//             }
-//         }
+    componentWillReceiveProps(nextProps) {
+         if (nextProps.showSpinner) {
+            this.setState({ showSpinner: true });
+        } else {
+            this.setState({ showSpinner: false });
+        }
 
-//     }
+        if (!_.isEmpty(nextProps.initialGridData) && !_.isEmpty(nextProps.columnConfig) && _.isEmpty(nextProps.updatedGridData)) {
+                let sortedGridData = _.sortBy(nextProps.initialGridData, 'id');
+                if (sortedGridData.length > 5) {
+                    let newGridData = sortedGridData.slice(Math.max(sortedGridData.length - 5, 1));
+                    newGridData.map((obj, index) => {
+                        obj.s_no = index + 1;
+                    });
+                    this.setState({ rowData: newGridData, columnsConfig: nextProps.columnConfig });
+                    this.props.actions.updateSupplyPageGridData(newGridData);
+                } else {
+                    sortedGridData.map((obj, index) => {
+                        obj.s_no = index + 1;
+                    });
+                    this.setState({ rowData: sortedGridData, columnsConfig: nextProps.columnConfig });
+                    this.props.actions.updateSupplyPageGridData(sortedGridData);
+                }
+            }
+            if (!_.isEmpty(nextProps.columnConfig) && !_.isEmpty(nextProps.updatedGridData) && !_.isEqual(this.props.updatedGridData, nextProps.updatedGridData)) {
+                let sortedGridData = _.sortBy(nextProps.updatedGridData, 'id');
+                this.setState({ rowData: sortedGridData, columnsConfig: nextProps.columnConfig });
+                this.props.actions.updateSupplyPageGridData(sortedGridData);
+            }
+        }
+
+  
 
     rowGetter = (i) => {
         return this.state.rowData[i] ? this.state.rowData[i] : {};
