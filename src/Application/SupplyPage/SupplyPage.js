@@ -118,11 +118,6 @@ class SupplyPage extends React.Component {
                 format: "number"
             }
         ];
-        if (this.props.showSpinner) {
-            this.setState({ showSpinner: true });
-        } else {
-            this.setState({ showSpinner: false });
-        }
 
         if (_.isEmpty(this.props.columnConfig)) {
             this.props.actions.supplyColumnConfig(this.columnsConfig);
