@@ -418,7 +418,7 @@ class InHousePage extends React.Component {
                         columns={!_.isEmpty(this.state.columnsConfig) ? this.state.columnsConfig : []}
                         rowGetter={this.rowGetter}
                         rowsCount={this.state.rowData ? this.state.rowData.length : 0}
-                        minHeight={300}
+                        minHeight={350}
                         onGridRowsUpdated={this.handleGridRowsUpdated}
                         onRowClick={this.onRowClick}
                         rowSelection={{

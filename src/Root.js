@@ -2,13 +2,16 @@ import React, { Component } from "react";
 import { Provider } from "react-redux";
 import { routeComponents } from "./Route";
 import { Store } from "./Store";
+import ErrorBoundary from "./Application/ErrorHandler"
 
 class Root extends Component {
     render() {
         return (
-            <Provider store={Store}>
-                {routeComponents}
-            </Provider>
+            <ErrorBoundary>
+                <Provider store={Store}>
+                    {routeComponents}
+                </Provider>
+            </ErrorBoundary>
         );
     };
 }

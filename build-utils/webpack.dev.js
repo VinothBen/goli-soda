@@ -2,6 +2,7 @@ require('babel-polyfill');
 const commonPaths = require('./common-paths');
 const webpack = require('webpack');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+const FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin');
 const port = parseInt(process.env.PORT, 10) || 3000;
 const config = {
   mode: 'development',
@@ -86,7 +87,8 @@ const config = {
     ]
   },
   plugins: [
-    new webpack.HotModuleReplacementPlugin()
+    new webpack.HotModuleReplacementPlugin(),
+    new FriendlyErrorsWebpackPlugin()
   ],
   devServer: {
     host: 'localhost',
@@ -94,6 +96,7 @@ const config = {
     historyApiFallback: true,
     hot: true,
     compress: true,
+    quiet: true
   },
   node: {
     fs: 'empty',
