@@ -6,8 +6,9 @@ import ReactDataGrid from 'react-data-grid';
 import { FadeLoader } from 'react-spinners';
 import Workbook from 'react-excel-workbook';
 import { hashHistory } from "react-router";
-import { VictoryChart, VictoryLegend, VictoryPie, VictoryTooltip } from "victory";
+import { VictoryLegend, VictoryPie } from "victory";
 import { Modal, Button } from "react-bootstrap";
+// import ReactToPrint from "react-to-print";
 
 class DownloadPage extends React.Component {
     constructor(props) {
@@ -235,7 +236,7 @@ class DownloadPage extends React.Component {
                     editable: false
                 }
             );
-            value.map((obj, index) => {
+            value.map((obj) => {
                 columnConfigDetails2.push(
                     {
                         key: obj.bottleType ? obj.bottleType : "",
@@ -252,9 +253,9 @@ class DownloadPage extends React.Component {
         let objValue = _.reduce(Object.keys(groupValue), function (o, v) { return o[v] = 0, o; }, {});
         let resultData = _.reduce(groupValue, function (obj, val, key) { obj[key] += val[0].noOfBottles; return obj }, objValue);
         rowDataDetails2.push({ ...resultData, "day": value[0].day, "id": 1 });
-        let totalBottles = _.reduce(value, function (obj, val, key) { obj.sum += val.noOfBottles; return obj }, { sum: 0 });
-        let bottleProducedFor = _.reduce(value, function (obj, val, key) { obj.sum += parseInt(val.noOfBottles * val.rate); return obj }, { sum: 0 });
-        let emplyeeCost = _.reduce(value, function (obj, val, key) { obj.sum += val.employeeCost; return obj }, { sum: 0 });
+        let totalBottles = _.reduce(value, function (obj, val) { obj.sum += val.noOfBottles; return obj }, { sum: 0 });
+        let bottleProducedFor = _.reduce(value, function (obj, val) { obj.sum += parseInt(val.noOfBottles * val.rate); return obj }, { sum: 0 });
+        let emplyeeCost = _.reduce(value, function (obj, val) { obj.sum += val.employeeCost; return obj }, { sum: 0 });
         rowData.push({
             "id": 1,
             "date": value[0].date,
@@ -270,7 +271,7 @@ class DownloadPage extends React.Component {
     }
     constructVictryPieData = (rowData, keyObjects) => {
         let pieChartData = [], pieChartLegendData = [];
-        keyObjects.map((obj, index) => {
+        keyObjects.map((obj) => {
             if (rowData[0][obj] > 0) {
                 pieChartData.push({
                     x: rowData[0][obj] ? rowData[0][obj].toString() : "",
@@ -278,12 +279,12 @@ class DownloadPage extends React.Component {
                 });
                 pieChartLegendData.push({
                     name: obj,
-                    symbol: { fill: this.colorOptions[(pieChartData.length-1)], type: "circle" }
+                    symbol: { fill: this.colorOptions[(pieChartData.length - 1)], type: "circle" }
                 })
             }
         });
         this.setState({ pieChartData, pieChartLegendData });
-        }
+    }
     rowGetter = (i) => {
         return this.state.rowData[i] ? this.state.rowData[i] : {};
     };
@@ -320,7 +321,25 @@ class DownloadPage extends React.Component {
             return excelComponents;
         }
     }
+    print = () => {
+        var content = document.getElementById('printarea');
+        var pri = document.getElementById('ifmcontentstoprint').contentWindow;
+        pri.document.open();
+        pri.document.write(content.innerHTML);
+        pri.document.close();
+        pri.focus();
+        pri.print();
+    }
+
     render() {
+        let pieStyle = {
+                    float: "left",
+                    height: "100%",
+                    width: "50%",
+                    left: "15px",
+                    position: "relative",
+                    bottom: "0px"
+        };
         return (
             <div className="download-page">
                 {
@@ -339,17 +358,23 @@ class DownloadPage extends React.Component {
                                 Pie Chart View
                             </Modal.Title>
                         </Modal.Header>
-                        <Modal.Body>
-                            <div className="piechart-view">
-                                <div className="chart-pie">
+                        <iframe id="ifmcontentstoprint" style={{
+                            height: '0px',
+                            width: '0px',
+                            position: 'absolute',
+                            display: 'block'
+                        }}></iframe>
+                        <Modal.Body id='printarea'>
+                            <div className="piechart-view" ref={(cl) => this.pieChartDiv = cl}>
+                                <div style={pieStyle}>
                                     <VictoryPie
                                         data={this.state.pieChartData}
                                         colorScale={this.colorOptions}
                                         width={270}
-                                        height={270}
+                                        height={270}    
                                     />
                                 </div>
-                                <div className="chart-legend">
+                                <div style={{position: "absolute", width: "100%", height: "400px", top: "30%"}}>
                                     <VictoryLegend
                                         x={280} y={35}
                                         orientation="vertical"
@@ -383,7 +408,13 @@ class DownloadPage extends React.Component {
                                 </VictoryPie>
                             </div> */}
                         </Modal.Body>
-                        <Modal.Footer>
+                        <Modal.Footer className="mb-footer">
+                            <Button onClick={this.print} style={{ zIndex: 99 }}>Print</Button>
+                            {/* <ReactToPrint
+                                trigger={() => <Button style={{ zIndex: 99 }}>Print2</Button>}
+                                content={() => this.pieChartDiv}
+                                copyStyles
+                            /> */}
                             <Button style={{ zIndex: 99 }} onClick={() => this.setState({ showModel: false })}>Close</Button>
                         </Modal.Footer>
                     </Modal>
@@ -399,7 +430,7 @@ class DownloadPage extends React.Component {
                         <div className="date-header"><h4>Select Date:</h4></div>
                         <div onClick={this.handleDatePicker} className="date-details">
                             <span className="date-value">{this.state.selectedDate ? this.state.selectedDate : null}</span>
-                            <i class="far fa-calendar-alt date-icon"></i>
+                            <i className="far fa-calendar-alt date-icon"></i>
                         </div>
                         {this.state.showDatePicker ? <div className="date-picker">
                             <DateRangePicker

@@ -133,9 +133,9 @@
     .spinner-backround {
         position: absolute;
         width: 100%;
-        height: 150%;
+        height: 136%;
         background-color: #d3d3d3;
-        top: 13%;
+        top: 12%;
         z-index: 99;
         opacity: 0.5;
     }
@@ -161,13 +161,57 @@
                     width: 50%;
                     left: 15px;
                     position: relative;
-                    bottom: 15px;
+                    bottom: 0px;
                 }
                 .chart-legend {
                     position: absolute;
                     width: 100%;
                 }
             }
-        }  
+        } 
+        .mb-footer {
+            margin-top: 20px;
+        } 
+    }
+}
+@media print and (orientation: landscape) {
+    /* landscape styles */
+    /* write specific styles for landscape e.g */
+    @page {size: landscape;}
+    .chart-pie {
+        float: left;
+        height: 100%;
+        width: 50%;
+        left: 15px;
+        position: relative;
+    }
+    .chart-legend {
+        position: absolute;
+        width: 100%;
+        height: 600px;
+        top: 30%;
+        border-bottom: "1px solid";
+    }
+//       .no-print { display: none; }
+   }
+
+
+   //Styling works only for react-to-print library
+@media print and (orientation: portrait) {
+    /* portrait styles */
+    // .no-print { display: none; }
+    .chart-pie {
+        float: left;
+        height: 100%;
+        width: 50%;
+        left: 15px;
+        position: relative;
+    }
+    .chart-legend {
+        position: absolute;
+        width: 100%;
+        height: 600px;
+        top: 30%;
+        border-bottom: "1px solid";
     }
 }
