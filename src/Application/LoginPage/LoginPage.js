@@ -1,6 +1,6 @@
 import React from "react";
 import { ValidationForm, TextInput } from 'react-bootstrap4-form-validation';
-import { Modal, Button } from "react-bootstrap";
+import { Modal } from "react-bootstrap";
 import CryptoJS from "crypto-js";
 import { hashHistory } from "react-router";
 import { FadeLoader } from 'react-spinners';
@@ -16,7 +16,7 @@ class LoginPage extends React.Component {
             password: "",
             showSpinner: false
         };
-    };
+    }
     componentWillMount() {
         // console.log("...props login", this.props);
         if (!_.isEmpty(this.props) && this.props.username && this.props.token) {
@@ -44,7 +44,7 @@ class LoginPage extends React.Component {
         })
     }
 
-    handleSubmit = (e, formData, inputs) => {
+    handleSubmit = (e, formData) => {
         e.preventDefault();
         let newFormData = {
             user: _.cloneDeep(formData)

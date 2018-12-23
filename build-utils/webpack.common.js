@@ -16,9 +16,21 @@ const config = {
   module: {
     rules: [
       {
+        enforce: "pre",
         test: /\.(js)$/,
         exclude: /node_modules/,
-        use: ['babel-loader']
+        loader: "eslint-loader",
+        options: {
+          formatter: require("eslint/lib/formatters/stylish"),
+          eslintPath: require.resolve('eslint'),
+          emitWarning: true,
+          emitError: true
+        }
+      },
+      {
+        test: /\.(js)$/,
+        exclude: /node_modules/,
+        loader: "babel-loader",
       },
       {
         test: /\.tsx?$/,
@@ -46,6 +58,13 @@ const config = {
     new HtmlWebpackPlugin({
       template: 'public/index.html',
       favicon: 'public/favicon.ico'
+    }),
+    new webpack.ProvidePlugin({
+      _: "lodash",
+      "React": "react",
+      "ReactDOM": "react-dom",
+      "Promise": "imports-loader?this=>global!exports-loader?global.Promise!es6-promise",
+      "fetch": "imports-loader?this=>global!exports-loader?global.fetch!whatwg-fetch"
     })
   ]
 };

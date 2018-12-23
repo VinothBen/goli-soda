@@ -1,5 +1,4 @@
 import InHouseConstants from "./InHousePage.Constants";
-import InHouseDataConstants from "./InHousePage.Constants";
 // import axios from "axios";
 // import LocalDB from "../../LocalDB"
 export const inHousePageColumnConfig = (data) => {
@@ -67,8 +66,8 @@ export const getInHousePageDetails = (url, tokenValue) => {
         let requestURL = new Request(url, headerValue);
         fetch(requestURL).then((response) => {
             if (response.status >= 400) {
-                throw new Error("Bad Response From Server!");
                 dispatch(showInHouseSpinner(false));
+                throw new Error("Bad Response From Server!");
             } else {
                 return response.json();
             }
@@ -77,7 +76,7 @@ export const getInHousePageDetails = (url, tokenValue) => {
                 dispatch(getInHousePageDetailsSuccess(json));
                 dispatch(showInHouseSpinner(false));
             }
-        ).catch((error) => {
+        ).catch(() => {
             dispatch(showInHouseSpinner(false));
         })
     }
@@ -108,9 +107,9 @@ export const getSearchDetailsByDate = (url, tokenValue) => {
         let requestURL = new Request(url, headerValue);
         fetch(requestURL).then((response) => {
             if (response.status >= 400) {
-                throw new Error("Bad Response From Server!");
                 dispatch(showDownloadSpinner(false));
                 dispatch(onErrorSearchDetails({ message: "Bad Response From Server." }));
+                throw new Error("Bad Response From Server!");
             } else {
                 return response.json();
             }
@@ -135,23 +134,21 @@ export const getSearchDetailsByDate = (url, tokenValue) => {
 export const saveInHouseData = (url, postData, tokenValue) => {
     return (dispatch) => {
         url = decodeURIComponent(url);
-        var myHeaders = new Headers(
+        let myHeaders = new Headers(
             {
                 'Content-Type': 'application/json',
                 'authorization': tokenValue
             }
         );
-        var myInit = {
+        let myInit = {
             method: 'POST',
             headers: myHeaders,
             mode: 'cors',
             cache: 'default',
             body: JSON.stringify(postData)
         };
-
-        var myRequest = new Request(url, myInit);
+        let myRequest = new Request(url, myInit);
         fetch(myRequest).then(res => res.json())
-            .then(response => console.log('Success:', JSON.stringify(response)))
-            .catch(error => console.error('Error:', error));
+            .catch(error => dispatch(onErrorSearchDetails("Save failed."+ error)));
     }
 }

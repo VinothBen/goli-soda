@@ -2,10 +2,10 @@ import React from "react";
 import ReactDataGrid from 'react-data-grid';
 import { Editors } from 'react-data-grid-addons';
 import update from 'immutability-helper';
-import Workbook from 'react-excel-workbook';
+// import Workbook from 'react-excel-workbook';
 import { FadeLoader } from 'react-spinners';
-import index from "react-excel-workbook";
-import { hashHistory } from "react-router";
+// import index from "react-excel-workbook";
+// import { hashHistory } from "react-router";
 import { NotificationContainer, NotificationManager } from 'react-notifications';
 import 'react-notifications/lib/notifications.css';
 import moment from "moment";
@@ -154,7 +154,6 @@ class SupplyPage extends React.Component {
     }
 
     componentWillReceiveProps(nextProps) {
-        console.log("...nextProps inhouse", nextProps);
         if(!_.isEmpty(nextProps) && !_.isEmpty(nextProps.initialGridData)){
             this.setState({rowData: _.cloneDeep(nextProps.initialGridData)});
         }
@@ -288,7 +287,7 @@ class SupplyPage extends React.Component {
                         /> :
                         null}
                     <button className="btn btn-sm btn-primary buttons" data-toggle="tooltip" data-animation="true"
-                        data-placement="top" title="Undo"  disabled={_.isEmpty(this.state.undoStack) ? true : false}>
+                        data-placement="top" title="Undo" disabled={_.isEmpty(this.state.undoStack) ? true : false}>
                         <i className="fas fa-undo"></i>Undo</button>
                     <button className="btn btn-sm btn-primary buttons" disabled={_.isEmpty(this.state.redoStack) ? true : false}>
                         <i className="fas fa-redo" data-toggle="tooltip"

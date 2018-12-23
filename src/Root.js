@@ -13,7 +13,7 @@ class Root extends Component {
                 </Provider>
             </ErrorBoundary>
         );
-    };
+    }
 }
 export default Root;
 

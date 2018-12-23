@@ -54,7 +54,6 @@ export const updateSupplyPageGridData = (data) => {
 }
 
 export const getSupplyPageDetails = (url) => {
-    console.log("Am I Called.....")
     return (dispatch) => {
         dispatch(showSupplySpinner(true));
         url = decodeURIComponent(url);
@@ -67,8 +66,8 @@ export const getSupplyPageDetails = (url) => {
         let requestURL = new Request(url, headerValue);
         fetch(requestURL).then((response) => {
             if (response.status >= 400) {
-                throw new Error("Bad Response From Server!");
                 dispatch(showSupplySpinner(false));
+                throw new Error("Bad Response From Server!");
             } else {
                 return response.json();
             }
@@ -77,8 +76,8 @@ export const getSupplyPageDetails = (url) => {
                 dispatch(getSupplyPageDetailsSuccess(json));
                 dispatch(showSupplySpinner(false));
             }
-        ).catch((error) => {
-            dispatch(showInHouseSpinner(false));
+        ).catch(() => {
+            dispatch(showSupplySpinner(false));
         })
     }
 }

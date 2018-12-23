@@ -4,7 +4,7 @@ import { Editors } from 'react-data-grid-addons';
 import update from 'immutability-helper';
 import Workbook from 'react-excel-workbook';
 import { FadeLoader } from 'react-spinners';
-import index from "react-excel-workbook";
+// import index from "react-excel-workbook";
 import { hashHistory } from "react-router";
 import { NotificationContainer, NotificationManager } from 'react-notifications';
 import 'react-notifications/lib/notifications.css';
@@ -273,7 +273,7 @@ class InHousePage extends React.Component {
                         delete obj.s_no;
                         delete obj._id;
                     });
-                    for (var i = 0; i < newObjects.length; i++) {
+                    for (let i = 0; i < newObjects.length; i++) {
                         if (newObjects[i].date === "") {
                             isDateEmpty = (newObjects[i].date === "");
                             break;
@@ -299,7 +299,7 @@ class InHousePage extends React.Component {
         let maxSerialNo = rowData.length;
         let objectKeyName = Object.keys(rowData[0]);
         let value = {};
-        objectKeyName.map((obj, index) => {
+        objectKeyName.map((obj) => {
             if (obj === "id") {
                 value[obj] = maxId.id + 1;
             } else {
@@ -325,10 +325,10 @@ class InHousePage extends React.Component {
             let newRowData = [];
             undoStack.push(_.cloneDeep(rowData));
             if (this.state.showClearRowInput && this.state.rowId) {
-                rowData.map((obj, index) => {
+                rowData.map((obj) => {
                     if (obj.s_no === this.state.rowId) {
                         let objectKeyName = Object.keys(obj);
-                        objectKeyName.map((keyString, index) => {
+                        objectKeyName.map((keyString) => {
                             if (keyString === "s_no") {
                                 obj[keyString] = this.state.rowId;
                             } else {
@@ -342,7 +342,7 @@ class InHousePage extends React.Component {
                 this.setState({ rowData: newRowData, undoStack, redoStack: [] });
             } else if (this.state.showDeleteRowInput && this.state.rowId) {
                 newRowData = rowData.filter((item) => item.s_no !== this.state.rowId);
-                newRowData.map((obj, index) => {
+                newRowData.map((obj) => {
                     if (obj.s_no > this.state.rowId) {
                         obj.s_no = obj.s_no - 1;
                     }
@@ -400,7 +400,7 @@ class InHousePage extends React.Component {
                 <div className="nav-title">
                     <h4 className="nav-title-text">IN HOUSE DATA :</h4>
                     <button className="btn btn-sm btn-primary buttons-logout" onClick={() => this.onClickRefresh()}>
-                        <i class="fas fa-sync-alt"></i>Refresh</button>
+                        <i className="fas fa-sync-alt"></i>Refresh</button>
                 </div>
                 {
                     this.state.showSpinner ? <div className="spinner-backround">&nbsp;</div> : null

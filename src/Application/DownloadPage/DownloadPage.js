@@ -8,6 +8,7 @@ import Workbook from 'react-excel-workbook';
 import { hashHistory } from "react-router";
 import { VictoryLegend, VictoryPie } from "victory";
 import { Modal, Button } from "react-bootstrap";
+// import moment from "moment";
 // import ReactToPrint from "react-to-print";
 
 class DownloadPage extends React.Component {
@@ -17,6 +18,9 @@ class DownloadPage extends React.Component {
             value: new Date().toISOString(),
             // startDate: moment(),
             dates: null,
+            startDate: null,
+            endDate: null,
+            dateSelection: "single",
             selectedDate: null,
             showDatePicker: false,
             rowData: [],
@@ -111,31 +115,31 @@ class DownloadPage extends React.Component {
             {
                 key: 'date',
                 name: 'DATE',
-                width: 240,
+                width: 250,
                 editable: false
             },
             {
                 key: 'day',
                 name: 'DAY',
-                width: 240,
+                width: 250,
                 editable: false
             },
             {
                 key: 'total-bottles',
                 name: 'TOTAL BOTTLES',
-                width: 240,
+                width: 250,
                 editable: false
             },
             {
                 key: 'bottles-producedfor',
                 name: 'BOTTLES PRODUCED FOR',
-                width: 240,
+                width: 250,
                 editable: false
             },
             {
                 key: 'employee-cost',
                 name: 'EMPLOYEE COST',
-                width: 240,
+                width: 250,
                 editable: false
             }
         ];
@@ -147,39 +151,45 @@ class DownloadPage extends React.Component {
                 "editable": false
             },
             {
+                key: "date",
+                name: "DATE",
+                width: 250,
+                editable: false
+            },
+            {
                 "key": "day",
                 "name": "DAY",
-                "width": 100,
+                "width": 250,
                 "editable": false
             },
             {
                 "key": "crown cap 200ml",
                 "name": "crown cap 200ml",
-                "width": 280,
+                "width": 250,
                 "editable": false
             },
             {
                 "key": "crown cap 250ml",
                 "name": "crown cap 250ml",
-                "width": 280,
+                "width": 250,
                 "editable": false
             },
             {
                 "key": "goli colour",
                 "name": "goli colour",
-                "width": 280,
+                "width": 250,
                 "editable": false
             },
             {
                 "key": "goli soda",
                 "name": "goli soda",
-                "width": 280,
+                "width": 250,
                 "editable": false
             }
         ];
         this.setState({ rowData: this.rowData, columnsConfig, columnConfigDetails2, rowDataDetails2: this.rowDataDetails2 });
         if (!_.isEmpty(this.props.searchDetailsByDate)) {
-            if (_.has(this.props, "searchDetailsByDate[0].inHouseData")) {
+            if (_.has(this.props, "searchDetailsByDate[0].inHouseData") && !_.isEmpty(this.props.searchDetailsByDate[0].inHouseData)) {
                 this.setState({ inHouseData: _.get(this.props, "searchDetailsByDate[0].inHouseData") });
                 this.constructGridData(_.get(this.props, "searchDetailsByDate[0].inHouseData"));
             }
@@ -192,7 +202,7 @@ class DownloadPage extends React.Component {
             hashHistory.push("/login");
         }
         if (!_.isEmpty(nextProps.searchDetailsByDate) && !_.isEqual(this.props.searchDetailsByDate, nextProps.searchDetailsByDate)) {
-            if (_.has(nextProps, "searchDetailsByDate[0].inHouseData")) {
+            if (_.has(nextProps, "searchDetailsByDate[0].inHouseData") && !_.isEmpty(nextProps.searchDetailsByDate[0].inHouseData)) {
                 this.setState({ inHouseData: _.get(nextProps, "searchDetailsByDate[0].inHouseData") });
                 this.constructGridData(_.get(nextProps, "searchDetailsByDate[0].inHouseData"));
             }
@@ -230,9 +240,15 @@ class DownloadPage extends React.Component {
                     editable: false
                 },
                 {
+                    key: "date",
+                    name: "DATE",
+                    width: 250,
+                    editable: false
+                },
+                {
                     key: "day",
                     name: "DAY",
-                    width: 100,
+                    width: 250,
                     editable: false
                 }
             );
@@ -241,7 +257,7 @@ class DownloadPage extends React.Component {
                     {
                         key: obj.bottleType ? obj.bottleType : "",
                         name: obj.bottleType ? obj.bottleType : "unknown type",
-                        width: 280,
+                        width: 250,
                         editable: false
                     }
                 );
@@ -252,7 +268,7 @@ class DownloadPage extends React.Component {
         let groupValue = _.groupBy(value, "bottleType");
         let objValue = _.reduce(Object.keys(groupValue), function (o, v) { return o[v] = 0, o; }, {});
         let resultData = _.reduce(groupValue, function (obj, val, key) { obj[key] += val[0].noOfBottles; return obj }, objValue);
-        rowDataDetails2.push({ ...resultData, "day": value[0].day, "id": 1 });
+        rowDataDetails2.push({ ...resultData, "date": value[0].date, "day": value[0].day, "id": 1 });
         let totalBottles = _.reduce(value, function (obj, val) { obj.sum += val.noOfBottles; return obj }, { sum: 0 });
         let bottleProducedFor = _.reduce(value, function (obj, val) { obj.sum += parseInt(val.noOfBottles * val.rate); return obj }, { sum: 0 });
         let emplyeeCost = _.reduce(value, function (obj, val) { obj.sum += val.employeeCost; return obj }, { sum: 0 });
@@ -292,7 +308,27 @@ class DownloadPage extends React.Component {
         return this.state.rowDataDetails2[i] ? this.state.rowDataDetails2[i] : {};
     }
     handleSelect = (dates) => {
-        this.setState({ dates, selectedDate: dates.format("MM-DD-YY"), showDatePicker: false, isDateSelected: true });
+        if (!_.isEmpty(dates) && this.state.dateSelection === "range") {
+            this.setState({
+                startDate: dates.start.format("MM-DD-YY"),
+                endDate: dates.end.format("MM-DD-YY"),
+                selectedDate: dates.start.format("MM-DD-YY") + " to " + dates.end.format("MM-DD-YY"),
+                showDatePicker: false,
+                isDateSelected: true,
+                dates,
+                showDateWarning: false
+            });
+        } else if (!_.isEmpty(dates) && this.state.dateSelection === "single") {
+            this.setState({
+                dates,
+                selectedDate: dates.format("MM-DD-YY"),
+                showDatePicker: false,
+                isDateSelected: true,
+                startDate: null,
+                endDate: null,
+                showDateWarning: false
+            });
+        }
     }
 
     handleDatePicker = () => {
@@ -300,12 +336,20 @@ class DownloadPage extends React.Component {
     }
     onClickSearch = () => {
         if (this.state.isDateSelected && this.state.selectedDate) {
-            this.setState({ showDateWarning: false, showSpinner: true });
-            if (this.props.username && this.props.token) {
-                // let  url = "http://localhost:3010/api/download-search?date=08-28-18";
-                let url = "https://goli-soda-services.herokuapp.com/api/download-search?date=" + this.state.selectedDate;
-                // let  url = "https://goli-soda-services.herokuapp.com/api/download-search?date=08-28-18";
-                this.props.inHousePageActions.getSearchDetailsByDate(url, this.props.token);
+            if (this.state.selectedDate && this.state.dateSelection === "single") {
+                this.setState({ showDateWarning: false, showSpinner: true });
+                if (this.props.username && this.props.token) {
+                    // let  url = "http://localhost:3010/api/download-search?date=08-28-18";
+                    let url = "https://goli-soda-services.herokuapp.com/api/download-search?date=" + this.state.selectedDate;
+                    this.props.inHousePageActions.getSearchDetailsByDate(url, this.props.token);
+                }
+            } else if (this.state.endDate && this.state.startDate && this.state.dateSelection === "range") {
+                this.setState({ showDateWarning: false, showSpinner: true });
+                if (this.props.username && this.props.token) {
+                    let url = "http://localhost:3010/api/download-search-MDates?start=" + this.state.startDate + "&end=" + this.state.endDate;
+                    // let url = "https://goli-soda-services.herokuapp.com/api/download-search-MDates?start=" + this.state.startDate+"&end=" + this.state.endDate;
+                    this.props.inHousePageActions.getSearchDetailsByDate(url, this.props.token);
+                }
             }
         }
         else {
@@ -322,23 +366,44 @@ class DownloadPage extends React.Component {
         }
     }
     print = () => {
-        var content = document.getElementById('printarea');
-        var pri = document.getElementById('ifmcontentstoprint').contentWindow;
+        let content = document.getElementById('printarea');
+        let pri = document.getElementById('ifmcontentstoprint').contentWindow;
         pri.document.open();
         pri.document.write(content.innerHTML);
         pri.document.close();
         pri.focus();
         pri.print();
     }
-
+    onChangeRadioButton = (e) => {
+        if (e.target.checked) {
+            this.setState({
+                dateSelection: "range",
+                dates: null, startDate: null,
+                endDate: null,
+                selectedDate: null,
+                isDateSelected: false,
+                showDatePicker: false
+            });
+        } else {
+            this.setState({
+                dateSelection: "single",
+                dates: null,
+                startDate: null,
+                endDate: null,
+                selectedDate: null,
+                isDateSelected: false,
+                showDatePicker: false
+            });
+        }
+    }
     render() {
         let pieStyle = {
-                    float: "left",
-                    height: "100%",
-                    width: "50%",
-                    left: "15px",
-                    position: "relative",
-                    bottom: "0px"
+            float: "left",
+            height: "100%",
+            width: "50%",
+            left: "15px",
+            position: "relative",
+            bottom: "0px"
         };
         return (
             <div className="download-page">
@@ -371,10 +436,10 @@ class DownloadPage extends React.Component {
                                         data={this.state.pieChartData}
                                         colorScale={this.colorOptions}
                                         width={270}
-                                        height={270}    
+                                        height={270}
                                     />
                                 </div>
-                                <div style={{position: "absolute", width: "100%", height: "400px", top: "30%"}}>
+                                <div style={{ position: "absolute", width: "100%", height: "400px", top: "30%" }}>
                                     <VictoryLegend
                                         x={280} y={35}
                                         orientation="vertical"
@@ -436,10 +501,14 @@ class DownloadPage extends React.Component {
                             <DateRangePicker
                                 onSelect={this.handleSelect}
                                 value={this.state.dates}
-                                selectionType="single"
+                                selectionType={this.state.dateSelection}
                                 local="en"
                             />
                         </div> : null}
+                        <span className="date-range-selection">
+                            <input type="checkbox" onChange={this.onChangeRadioButton} disabled={this.state.showDatePicker} />
+                            <span>Date Range</span>
+                        </span>
                         {this.state.showDateWarning ? <span className="date-warning-message">Please Select Date.</span> : null}
                         <button className="btn btn-sm btn-success button-search" onClick={this.onClickSearch}>
                             <i className="fas fa-search search-icon"></i>Search</button>

@@ -64,7 +64,7 @@ class LandingPage extends React.Component {
                 <div className="header-text"><span className="first">Kannan&nbsp;</span><span className="second">Soda</span></div>
                 <div className="logout-button" data-toggle="tooltip" title="Logout"
                     data-delay={{ "show": 0, "hide": 100 }} onClick={()=> this.setState({showModel:true})}>
-                    <i class="fas fa-sign-out-alt"></i>
+                    <i className="fas fa-sign-out-alt"></i>
                 </div>
                 <ul onClick={this.onClickNavMenu}>
                     {this.getNavigationMenu(this.state.navOptions)}
