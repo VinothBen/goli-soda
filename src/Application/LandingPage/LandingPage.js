@@ -8,7 +8,7 @@ class LandingPage extends React.Component {
         super(props);
         this.state = {
             activeIndex: "0",
-            navOptions: ["IN HOUSE", "SUPPLY", "BOTTLE RETURN", "DOWNLOAD", "CONTACT US"],
+            navOptions: ["IN HOUSE", "SUPPLY", "BOTTLE RETURN", "DOWNLOAD", "ABOUT"],
             showModel: false
         }
     }

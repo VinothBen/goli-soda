@@ -1,8 +1,11 @@
 const commonPaths = require('./common-paths');
 console.log(FgCyan = "\x1b[36m");
 console.log("projectRoot: ", commonPaths.projectRoot, FgGreen = "\x1b[32m");
+console.log("");
 console.log("outputPath: ", commonPaths.outputPath, FgYellow = "\x1b[33m");
+console.log("");
 console.log("appEntry: ", commonPaths.appEntry, FgBlue = "\x1b[34m");
+console.log("");
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
@@ -23,8 +26,7 @@ const config = {
         options: {
           formatter: require("eslint/lib/formatters/stylish"),
           eslintPath: require.resolve('eslint'),
-          emitWarning: true,
-          emitError: true
+          emitWarning: true
         }
       },
       {

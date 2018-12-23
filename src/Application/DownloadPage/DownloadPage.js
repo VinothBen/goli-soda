@@ -177,13 +177,13 @@ class DownloadPage extends React.Component {
             {
                 "key": "goli colour",
                 "name": "goli colour",
-                "width": 250,
+                "width": 210,
                 "editable": false
             },
             {
                 "key": "goli soda",
                 "name": "goli soda",
-                "width": 250,
+                "width": 210,
                 "editable": false
             }
         ];
@@ -242,13 +242,13 @@ class DownloadPage extends React.Component {
                 {
                     key: "date",
                     name: "DATE",
-                    width: 250,
+                    width: 200,
                     editable: false
                 },
                 {
                     key: "day",
                     name: "DAY",
-                    width: 250,
+                    width: 200,
                     editable: false
                 }
             );
@@ -257,7 +257,7 @@ class DownloadPage extends React.Component {
                     {
                         key: obj.bottleType ? obj.bottleType : "",
                         name: obj.bottleType ? obj.bottleType : "unknown type",
-                        width: 250,
+                        width: 210,
                         editable: false
                     }
                 );
@@ -517,7 +517,7 @@ class DownloadPage extends React.Component {
                 {!_.isEmpty(this.props.searchErrorMessage) && this.props.searchErrorMessage.message ?
                     <div className="search-warning"><h4>{this.props.searchErrorMessage.message}</h4></div> : null}
                 <div className="datagrid-container-1">
-                    <div className="grid-header-name"><h4>Details 1:</h4>
+                    <div className="grid-header-name"><h4>Manufacturing Cost Details:</h4>
                         <button className="btn btn-sm btn-primary charview-button" onClick={() => this.setState({ showModel: true })}>
                             <i className="fas fa-chart-pie"></i>Chart View</button>
                         {/* <button className="btn btn-sm btn-primary button-download">
@@ -562,7 +562,7 @@ class DownloadPage extends React.Component {
                 </div>
                 <div className="datagrid-container-2">
                     <div className="grid-header-name">
-                        <h4>Details 2:</h4>
+                        <h4>Bottle Details :</h4>
                     </div>
                     <ReactDataGrid
                         rowKey="id"
