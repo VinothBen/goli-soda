@@ -1,4 +1,4 @@
-import SupplyPageConstants from "./SupplyPage.Constants";
+import BottleReturnsPageConstants from "./BottleReturnsPage.Constants";
 
 const initialState = {
     columnConfig: [],
@@ -15,27 +15,27 @@ const initialState = {
     }
 };
 
-function supplyPageReducer(state = initialState, action) {
+function bottleReturnsPageReducer(state = initialState, action) {
     switch (action.type) {
-        case SupplyPageConstants.SUPPLY_COLUMN_CONFIG_UPDATE_DATA:
+        case BottleReturnsPageConstants.BOTTLE_RETURNS_COLUMN_CONFIG_UPDATE_DATA:
             return Object.assign({}, state, { columnConfig: action.data });
-        case SupplyPageConstants.SHOW_SUPPLY_SPINNER:
+        case BottleReturnsPageConstants.SHOW_BOTTLE_RETURNS_SPINNER:
             return Object.assign({}, state, { showSpinner: action.data });
-        case SupplyPageConstants.SHOW_DOWNLOAD_SPINNER:
+        case BottleReturnsPageConstants.SHOW_DOWNLOAD_SPINNER:
             return Object.assign({}, state, { showDownaloadPageSpinner: action.data });
-        case SupplyPageConstants.SHOW_SUPPLY_POPUPMODEL:
+        case BottleReturnsPageConstants.SHOW_BOTTLE_RETURNS_POPUPMODEL:
             return Object.assign({}, state, { showPopUpModel: action.showPopUpModel, popUpMessage: action.message });
-        case SupplyPageConstants.GET_SUPPLY_DATA_SUCCESS:
+        case BottleReturnsPageConstants.GET_BOTTLE_RETURNS_DATA_SUCCESS:
             return Object.assign({}, state, { initialGridData: action.data });
-        case SupplyPageConstants.UPDATE_SUPPLY_GRID_DATA:
+        case BottleReturnsPageConstants.UPDATE_BOTTLE_RETURNS_GRID_DATA:
             return Object.assign({}, state, { updatedGridData: action.data });
-        // case SupplyPageConstants.UPDATE_SEARCH_DETAILS_BY_SEARCH:
+        // case BottleReturnsPageConstants.UPDATE_SEARCH_DETAILS_BY_SEARCH:
         //     return Object.assign({}, state, { searchDetailsByDate: action.data, showDownaloadPageSpinner: false, searchErrorMessage: {} });
-        case SupplyPageConstants.ERROR_MESSAGE_WHILE_SEARCHING:
+        case BottleReturnsPageConstants.ERROR_MESSAGE_WHILE_SEARCHING:
             return Object.assign({}, state, { searchErrorMessage: action.data });
         default:
             return state;
     }
 }
-export default supplyPageReducer;
+export default bottleReturnsPageReducer;
 export { initialState };

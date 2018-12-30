@@ -19,7 +19,7 @@ class LoginPage extends React.Component {
     }
     componentWillMount() {
         // console.log("...props login", this.props);
-        if (!_.isEmpty(this.props) && this.props.username && this.props.token) {
+        if (!_.isEmpty(this.props) && !_.isEmpty(this.props.userDetails) && this.props.token) {
             hashHistory.push("/in-house");
         }
         if (this.props.errorMessage) {
@@ -29,7 +29,7 @@ class LoginPage extends React.Component {
     componentWillReceiveProps(nextProps) {
         // console.log("...nextProps login", this.props, nextProps);
         if (!_.isEqual(this.props, nextProps)) {
-            if (nextProps.username && nextProps.token) {
+            if (!_.isEmpty(nextProps.userDetails) && nextProps.token) {
                 this.setState({ showSpinner: false });
                 hashHistory.push("/in-house");
             }
@@ -52,8 +52,8 @@ class LoginPage extends React.Component {
         if (newFormData && newFormData.user.password) {
             this.setState({ showSpinner: true });
             newFormData.user.password = CryptoJS.AES.encrypt(newFormData.user.password, 'secret key vinothben').toString();
-            // this.props.landingPageActions.loginPostCall("http://localhost:3010/api/user/login", newFormData);
-            this.props.landingPageActions.loginPostCall("https://goli-soda-services.herokuapp.com/api/user/login", newFormData);
+            this.props.landingPageActions.loginPostCall("http://localhost:3010/api/user/login", newFormData);
+            // this.props.landingPageActions.loginPostCall("https://goli-soda-services.herokuapp.com/api/user/login", newFormData);
         }
     }
 

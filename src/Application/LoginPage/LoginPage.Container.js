@@ -6,7 +6,7 @@ export default connect(
     (state)=>{
        return {
                 token: state.landingPageReducer.token,
-                username: state.landingPageReducer.username,
+                userDetails: state.landingPageReducer.userDetails,
                 errorMessage: state.landingPageReducer.errorMessage,
               };
 },

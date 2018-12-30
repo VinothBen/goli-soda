@@ -2,34 +2,18 @@ import React from "react";
 import ReactDataGrid from 'react-data-grid';
 import { Editors } from 'react-data-grid-addons';
 import update from 'immutability-helper';
-import Workbook from 'react-excel-workbook';
+// import Workbook from 'react-excel-workbook';
 import { FadeLoader } from 'react-spinners';
 // import index from "react-excel-workbook";
-import { hashHistory } from "react-router";
+// import { hashHistory } from "react-router";
 import { NotificationContainer, NotificationManager } from 'react-notifications';
 import 'react-notifications/lib/notifications.css';
 import moment from "moment";
+import { hashHistory } from "react-router";
 
 const { AutoComplete: AutoCompleteEditor } = Editors;
-// const days = [
-//     { id: 0, title: 'Monday' },
-//     { id: 1, title: 'Tuesday' },
-//     { id: 2, title: 'Wednesday' },
-//     { id: 3, title: 'Thursday' },
-//     { id: 4, title: 'Friday' },
-//     { id: 5, title: 'Saturday' },
-//     { id: 6, title: 'Sunday' }
-// ];
-// const bottleType = [
-//     { id: 0, title: 'crown cap 200ml' },
-//     { id: 1, title: 'goli colour' },
-//     { id: 2, title: 'goli soda' },
-//     { id: 3, title: 'crown cap 250ml' }
-// // ];
-// const BottleType = <AutoCompleteEditor options={bottleType} />;
-// const DaysDropDownValue = <AutoCompleteEditor options={days} />;
 
-class InHousePage extends React.Component {
+class BottleReturnsPage extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -43,7 +27,7 @@ class InHousePage extends React.Component {
             undoStack: [],
             redoStack: [],
             showMessage: ""
-        };
+        }
         this.bottleType = [
             { id: 0, title: 'crown cap 200ml' },
             { id: 1, title: 'goli colour' },
@@ -61,20 +45,18 @@ class InHousePage extends React.Component {
         ];
         this.BottleType = <AutoCompleteEditor options={this.bottleType} />;
         this.DaysDropDownValue = <AutoCompleteEditor options={this.days} />;
+        this.columnsConfig = [];
     }
 
     componentWillMount() {
-        // let rowData = [
-        //     { "id": 1, "date": "11/27/2017", "day": "Monday", "bottleType": "crown cap 200ml", "rate": "6", "bottleCount": "5,280", "empCount": "7", "empCost": "1400", "totalCost": "31680" },
-        //     { "id": 2, "date": "11/27/2017", "day": "Monday", "bottleType": "goli colour", "rate": "6", "bottleCount": "5,280", "empCount": "7", "empCost": "1400", "totalCost": "31680" },
-        //     { "id": 3, "date": "11/27/2017", "day": "Monday", "bottleType": "goli soda", "rate": "6", "bottleCount": "5,280", "empCount": "7", "empCost": "1400", "totalCost": "31680" }
-        // ];
         if (_.isEmpty(this.props.userDetails) && !this.props.token) {
             hashHistory.push("/login");
         } else {
-            let columnsConfig = [
+            const url = "http://localhost:3010/api/getBottleReturnsData?date=" + this.props.userDetails.lastSavedDateForBottleReturns.toString();
+            // let url = "https://goli-soda-services.herokuapp.com/api/getBottleReturnsData?date="+  this.props.userDetails.lastSavedDateForBottleReturns.toString();
+            this.columnsConfig = [
                 {
-                    key: 's_no',
+                    key: 'id',
                     name: 'S.NO',
                     width: 50
                 },
@@ -91,137 +73,65 @@ class InHousePage extends React.Component {
                     format: "string"
                 },
                 {
+                    key: 'area',
+                    name: 'AREA',
+                    editable: true,
+                    format: "string"
+
+                },
+                {
                     key: 'bottle_type',
                     name: 'BOTTLE TYPE',
                     editor: this.BottleType,
                     format: "string"
                 },
                 {
-                    key: 'rate',
-                    name: 'RATE',
+                    key: 'delivered_bottles',
+                    name: 'DELEVERED BOTTLES',
                     editable: true,
-                    format: "number"
-                },
-                {
-                    key: 'no_of_bottles',
-                    name: 'NO.OF.BOTTLES',
-                    editable: true,
-                    format: "number"
+                    format: "string"
 
                 },
                 {
-                    key: 'employee_involved',
-                    name: 'EMPLOYEE-INVOLVED',
+                    key: 'empty_bottles_count',
+                    name: 'EMPTY BOTTLES COUNT',
                     editable: true,
-                    format: "number"
+                    format: "string"
+
                 },
                 {
-                    key: 'employee_cost',
-                    name: 'EMPLOYEE-COST',
+                    key: 'return_bottles',
+                    name: 'RETURN BOTTLES',
                     editable: true,
-                    format: "number"
-                },
-                {
-                    key: 'bottles_for_cost',
-                    name: 'BOTTLES FOR COST',
-                    editable: true,
-                    format: "number"
+                    format: "string"
+
                 }
             ];
-            // this.setState({ columnsConfig });
-            // this.props.inHousePageActions.inHousePageActionCheck("Hai");
-            if (this.props.showSpinner) {
-                this.setState({ showSpinner: true });
-            } else {
-                this.setState({ showSpinner: false });
-            }
-            if (_.isEmpty(this.props.columnConfig)) {
-                this.props.inHousePageActions.inHousePageColumnConfig(columnsConfig);
+
+            this.setState({ showSpinner: this.props.showSpinner });
+            if (_.isEmpty(this.props.columnConfig) || _.isEmpty(this.state.columnsConfig)) {
+                this.props.bottleReturnActions.bottleReturnsColumnConfig(this.columnsConfig);
+                this.setState({ columnsConfig: this.columnsConfig });
             }
             if (_.isEmpty(this.props.initialGridData) && this.props.token) {
-                let URL = "http://localhost:3010/api/inhouse-getdata?date="+ this.props.userDetails.lastSavedDateForInhouse.toString();
-                // let URL = "https://goli-soda-services.herokuapp.com/api/inhouse-getdata?date=" + this.props.userDetails.lastSavedDateForInhouse.toString();
-                this.props.inHousePageActions.getInHousePageDetails(URL, this.props.token);
+                this.props.bottleReturnActions.getBottleReturnsDetails(url, this.props.token);
             }
-
-            if (!_.isEmpty(this.props.initialGridData) && !_.isEmpty(this.props.columnConfig) && _.isEmpty(this.props.updatedGridData)) {
-                let sortedGridData = _.sortBy(this.props.initialGridData, 'id');
-                if (sortedGridData.length > 5) {
-                    // let newGridData = sortedGridData.slice(Math.max(sortedGridData.length - 5, 1));
-                    let newGridData = _.cloneDeep(sortedGridData);
-                    newGridData.map((obj, index) => {
-                        obj.s_no = index + 1;
-                    });
-                    this.setState({ rowData: newGridData, columnsConfig: this.props.columnConfig });
-                    this.props.inHousePageActions.updateInHousePageGridData(newGridData);
-                } else {
-                    sortedGridData.map((obj, index) => {
-                        obj.s_no = index + 1;
-                    });
-                    this.setState({ rowData: sortedGridData, columnsConfig: this.props.columnConfig });
-                    this.props.inHousePageActions.updateInHousePageGridData(sortedGridData);
-                }
-            }
-            if (!_.isEmpty(this.props.columnConfig) && !_.isEmpty(this.props.updatedGridData)) {
-                let sortedGridData = _.sortBy(this.props.updatedGridData, 'id');
-                this.setState({ rowData: sortedGridData, columnsConfig: this.props.columnConfig });
-                this.props.inHousePageActions.updateInHousePageGridData(sortedGridData);
+            if (!_.isEmpty(this.props) && !_.isEmpty(this.props.initialGridData)) {
+                this.setState({ rowData: _.cloneDeep(this.props.initialGridData) });
             }
         }
-
     }
 
     componentWillReceiveProps(nextProps) {
         if (_.isEmpty(nextProps.userDetails) && !nextProps.token) {
             hashHistory.push("/login");
         } else {
-            if (nextProps.showSpinner) {
-                this.setState({ showSpinner: true });
-            } else {
-                this.setState({ showSpinner: false });
+            if (!_.isEmpty(nextProps) && !_.isEmpty(nextProps.initialGridData) && _.isEmpty(nextProps.updatedGridData)) {
+                this.setState({ rowData: _.cloneDeep(nextProps.initialGridData) });
+                this.props.bottleReturnActions.updateBottleReturnsGridData(nextProps.initialGridData);
             }
-            // if (_.isEmpty(nextProps.initialGridData) && !_.isEmpty(nextProps.token)) {
-            //     let URL = "http://localhost:3010/api/inhouse-getdata";
-            //     // let URL = "https://goli-soda-services.herokuapp.com/api/inhouse-getdata";
-            //     this.props.inHousePageActions.getInHousePageDetails(URL, nextProps.token.toString());
-            // }
-            if (!_.isEmpty(nextProps.initialGridData) && !_.isEmpty(nextProps.columnConfig) && _.isEmpty(nextProps.updatedGridData)) {
-                let sortedGridData = _.sortBy(nextProps.initialGridData, 'id');
-                if (sortedGridData.length > 5) {
-                    // let newGridData = sortedGridData.slice(Math.max(sortedGridData.length - 5, 1));
-                    let newGridData = _.cloneDeep(sortedGridData);
-                    newGridData.map((obj, index) => {
-                        obj.s_no = index + 1;
-                    });
-                    this.setState({ rowData: newGridData, columnsConfig: nextProps.columnConfig });
-                    this.props.inHousePageActions.updateInHousePageGridData(newGridData);
-                } else {
-                    sortedGridData.map((obj, index) => {
-                        obj.s_no = index + 1;
-                    });
-                    this.setState({ rowData: sortedGridData, columnsConfig: nextProps.columnConfig });
-                    this.props.inHousePageActions.updateInHousePageGridData(sortedGridData);
-                }
-            }
-            if (!_.isEmpty(nextProps.columnConfig) && !_.isEmpty(nextProps.updatedGridData) && !_.isEqual(this.props.updatedGridData, nextProps.updatedGridData)) {
-                let sortedGridData = _.sortBy(nextProps.updatedGridData, 'id');
-                // if (sortedGridData.length > 5) {
-                //     let newGridData = sortedGridData.slice(Math.max(sortedGridData.length - 5, 1));
-                //     newGridData.map((obj, index) => {
-                //         obj.s_no = index + 1;
-                //     });
-                //     this.setState({ rowData: newGridData, columnsConfig: nextProps.columnConfig });
-                // } else {
-                // sortedGridData.map((obj, index) => {
-                //     obj.s_no = index + 1;
-                // });
-                this.setState({ rowData: sortedGridData, columnsConfig: nextProps.columnConfig });
-                this.props.inHousePageActions.updateInHousePageGridData(sortedGridData);
-
-                // }
-            }
+            this.setState({ showSpinner: nextProps.showSpinner });
         }
-
     }
 
     rowGetter = (i) => {
@@ -263,19 +173,15 @@ class InHousePage extends React.Component {
     };
 
     onClickSave = () => {
-        if (!_.isEmpty(this.props.userDetails) && this.props.token) {
+        if (!_.isEmpty(this.props.userDetails) && this.props.username) {
             let newObjects = [];
-            // let SaveURL = "http://localhost:3010/api/inhouse-savedata";
-            let SaveURL = "https://goli-soda-services.herokuapp.com/api/inhouse-savedata";
+            let SaveURL = "http://localhost:3010/api/bottleReturns-saveData";
+            // let SaveURL = "https://goli-soda-services.herokuapp.com/api/bottleReturns-saveData";
             let rowData = _.cloneDeep(this.state.rowData);
-            if (!_.isEmpty(rowData) && rowData.length > 5 && !_.isEqual(rowData, this.props.updatedGridData)) {
-                newObjects = _.differenceWith(rowData, this.props.updatedGridData, (obj1, obj2) => { return obj1.s_no === obj2.s_no });
+            if (!_.isEmpty(rowData) && !_.isEmpty(this.props.updatedGridData) && !_.isEqual(rowData, this.props.updatedGridData)) {
+                newObjects = _.differenceWith(rowData, this.props.updatedGridData, (obj1, obj2) => { return obj1.id === obj2.id });
                 if (!_.isEmpty(newObjects)) {
                     let isDateEmpty = false;
-                    newObjects.map((obj) => {
-                        delete obj.s_no;
-                        delete obj._id;
-                    });
                     for (let i = 0; i < newObjects.length; i++) {
                         if (newObjects[i].date === "") {
                             isDateEmpty = (newObjects[i].date === "");
@@ -283,10 +189,10 @@ class InHousePage extends React.Component {
                         }
                     }
                     if (!isDateEmpty) {
-                        this.props.inHousePageActions.saveInHouseData(SaveURL, 
-                            { inhousedata: newObjects, username: this.props.userDetails.username }, this.props.token, this.state.rowData);
+                        this.props.bottleReturnActions.saveBottleReturnsData(SaveURL,
+                            { bottleReturnsData: newObjects, username: this.props.userDetails.username.toString() }, this.props.token, this.state.rowData);
                         // NotificationManager.success('Data Saved Successfully.', 'Message', 3000);
-                        // this.props.inHousePageActions.updateInHousePageGridData(this.state.rowData);
+                        // this.props.bottleReturnActions.updateBottleReturnsGridData(this.state.rowData);
                     } else {
                         NotificationManager.error('Date fields should not be empty.', 'Message', 4000);
                     }
@@ -309,8 +215,7 @@ class InHousePage extends React.Component {
                 value[obj] = "";
             }
         });
-        value.s_no = maxSerialNo + 1;
-        // let newObject = { "id": maxId.id + 1, "date": "", "day": "", "bottleType": "", "rate": "", "bottleCount": "", "empCount": "", "empCost": "", "totalCost": "" };
+        value.id = (maxSerialNo + 1).toString();
         rowData.push(value);
         this.setState({ rowData, undoStack, redoStack: [] });
     }
@@ -329,25 +234,24 @@ class InHousePage extends React.Component {
             undoStack.push(_.cloneDeep(rowData));
             if (this.state.showClearRowInput && this.state.rowId) {
                 rowData.map((obj) => {
-                    if (obj.s_no === this.state.rowId) {
+                    if (Number(obj.id) === this.state.rowId) {
                         let objectKeyName = Object.keys(obj);
                         objectKeyName.map((keyString) => {
-                            if (keyString === "s_no") {
+                            if (keyString === "id") {
                                 obj[keyString] = this.state.rowId;
                             } else {
                                 obj[keyString] = "";
                             }
                         });
-                        // obj = { "id": this.state.rowId, "date": "", "day": "", "bottleType": "", "rate": "", "bottleCount": "", "empCount": "", "empCost": "", "totalCost": "" };
                     }
                     newRowData.push(obj);
                 });
                 this.setState({ rowData: newRowData, undoStack, redoStack: [] });
             } else if (this.state.showDeleteRowInput && this.state.rowId) {
-                newRowData = rowData.filter((item) => item.s_no !== this.state.rowId);
+                newRowData = rowData.filter((item) => Number(item.id) !== this.state.rowId);
                 newRowData.map((obj) => {
-                    if (obj.s_no > this.state.rowId) {
-                        obj.s_no = obj.s_no - 1;
+                    if (Number(obj.id) > this.state.rowId) {
+                        obj.id = (Number(obj.id) - 1).toString();
                     }
                 });
                 this.setState({ rowData: newRowData, undoStack, redoStack: [] });
@@ -364,7 +268,6 @@ class InHousePage extends React.Component {
             let newRowData = _.cloneDeep(undoStack[(undoStack.length - 1)]);
             let redoStack = this.state.redoStack ? _.cloneDeep(this.state.redoStack) : [];
             redoStack.push(_.cloneDeep(this.state.rowData));
-            // delete undoStack[(undoStack.length-1)];
             undoStack.pop();
             this.setState({ undoStack, rowData: newRowData, redoStack });
         }
@@ -379,42 +282,34 @@ class InHousePage extends React.Component {
             this.setState({ rowData: newRowData, redoStack, undoStack });
         }
     }
-    getWorkBookDetails = (columns) => {
-        if (columns) {
-            let excelComponents = [];
-            columns.map((obj, index) => {
-                excelComponents.push(<Workbook.Column key={index} label={obj.name} value={obj.key} />);
-            });
-            return excelComponents;
-        }
-    }
+
     onClickRefresh = () => {
         if (!_.isEmpty(this.props.userDetails) && !_.isEmpty(this.props.token)) {
-            let URL = "http://localhost:3010/api/inhouse-getdata?date="+ this.props.userDetails.lastSavedDateForInhouse.toString();
-            // let URL = "https://goli-soda-services.herokuapp.com/api/inhouse-getdata?date="+ this.props.userDetails.lastSavedDateForInhouse.toString();
-            this.setState({ rowData: [], redoStack: [], undoStack:[] });
-            this.props.inHousePageActions.updateInHousePageGridData([]);
-            this.props.inHousePageActions.getInHousePageDetails(URL, this.props.token.toString());
+            let URL = "http://localhost:3010/api/getBottleReturnsData?date=" + this.props.userDetails.lastSavedDateForBottleReturns.toString();
+            // let URL = "https://goli-soda-services.herokuapp.com/api/getBottleReturnsData?date="+ this.props.userDetails.lastSavedDateForBottleReturns.toString();
+            this.setState({ rowData: [], redoStack: [], undoStack: [] });
+            this.props.bottleReturnActions.updateBottleReturnsGridData([]);
+            this.props.bottleReturnActions.getBottleReturnsDetails(URL, this.props.token.toString());
         }
     }
     render() {
-         //To show notifications for succes/error/warning
-         if(!_.isEmpty(this.props.searchErrorMessage)){
-            if(!_.isEmpty(this.props.searchErrorMessage) && this.props.searchErrorMessage.message && this.props.searchErrorMessage.type === "error"){
+        //To show notifications for succes/error/warning
+        if (!_.isEmpty(this.props.searchErrorMessage)) {
+            if (!_.isEmpty(this.props.searchErrorMessage) && this.props.searchErrorMessage.message && this.props.searchErrorMessage.type === "error") {
                 NotificationManager.error(this.props.searchErrorMessage.message, 'Message', 4000);
-                this.props.inHousePageActions.onErrorSearchDetails({});
-            }else if(!_.isEmpty(this.props.searchErrorMessage) && this.props.searchErrorMessage.message && this.props.searchErrorMessage.type === "success"){
+                this.props.bottleReturnActions.onErrorSearchDetails({});
+            } else if (!_.isEmpty(this.props.searchErrorMessage) && this.props.searchErrorMessage.message && this.props.searchErrorMessage.type === "success") {
                 NotificationManager.success(this.props.searchErrorMessage.message, 'Message', 3000);
-                this.props.inHousePageActions.onErrorSearchDetails({});
+                this.props.bottleReturnActions.onErrorSearchDetails({});
             }
         }
         return (
             <div className="in-house-container">
                 <NotificationContainer />
                 <div className="nav-title">
-                    <h4 className="nav-title-text">IN HOUSE DATA :</h4>
+                    <h4 className="nav-title-text">BOTTLE RETURNS DETAILS :</h4>
                     <button className="btn btn-sm btn-primary buttons-logout" onClick={() => this.onClickRefresh()}>
-                        <i className="fas fa-sync-alt"></i>Refresh</button>
+                        <i class="fas fa-sync-alt"></i>Refresh</button>
                 </div>
                 {
                     this.state.showSpinner ? <div className="spinner-backround">&nbsp;</div> : null
@@ -429,7 +324,7 @@ class InHousePage extends React.Component {
                     <ReactDataGrid
                         rowKey="id"
                         enableCellSelect={true}
-                        columns={!_.isEmpty(this.state.columnsConfig) ? this.state.columnsConfig : []}
+                        columns={!_.isEmpty(this.columnsConfig) ? this.columnsConfig : []}
                         rowGetter={this.rowGetter}
                         rowsCount={this.state.rowData ? this.state.rowData.length : 0}
                         minHeight={350}
@@ -443,8 +338,7 @@ class InHousePage extends React.Component {
                             selectBy: {
                                 indexes: this.state.selectedIndexes
                             }
-                        }}
-                    />
+                        }} />
                     <button className="btn btn-sm btn-success buttons" onClick={this.onClickSave}>
                         <i className="fas fa-save"></i>Save Data</button>
                     <button className="btn btn-sm btn-primary buttons" onClick={this.onCreateRow}>
@@ -476,21 +370,9 @@ class InHousePage extends React.Component {
                         <i className="fas fa-redo" data-toggle="tooltip"
                             data-delay={{ "show": 1000, "hide": 100 }} data-animation="true" data-placement="top" title="Redo"></i>Redo</button>
                 </div>
-
-                {/* <div className="row text-center" style={{ marginTop: '100px' }}>
-                    <Workbook filename="InHouseData.xlsx"
-                        element={
-                            <button className="btn btn-lg btn-primary">
-                                <i className="glyphicon glyphicon-download-alt"></i>Download Excel
-                        </button>
-                        }>
-                        <Workbook.Sheet data={this.state.rowData ? this.state.rowData : []} name="InHouseData">
-                            {!_.isEmpty(this.state.columnsConfig) ? this.getWorkBookDetails(this.state.columnsConfig) : null}
-                        </Workbook.Sheet>
-                    </Workbook>
-                </div> */}
             </div>
         );
     }
 }
-export default InHousePage;
+
+export default BottleReturnsPage;

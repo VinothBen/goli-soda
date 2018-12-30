@@ -6,6 +6,7 @@ import { syncHistoryWithStore } from "react-router-redux";
 import LandingPage from "../src/Application/LandingPage/LandingPage.Container";
 import InHousePage from "../src/Application/InHousePage/InHousePage.Container";
 import SupplyPage from "../src/Application/SupplyPage/SupplyPage.Container";
+import BottleReturnsPage from "../src/Application/BottleReturnsPage/BottleReturnsPage.Container";
 import DownloadPage from "../src/Application/DownloadPage/DownloadPage.Container";
 import LoginPage from "../src/Application/LoginPage/LoginPage.Container";
 
@@ -18,7 +19,7 @@ export const routeComponents = (
            <IndexRoute component={InHousePage}/>
             <Route path="/in-house" component={InHousePage} />
             <Route path="/supply" component={SupplyPage}/>
-            <Route path="/bottle-return" component={()=>(<div>Bottle Return Page Found!</div>)}/>
+            <Route path="/bottle-return" component={BottleReturnsPage}/>
             <Route path="/download" component={DownloadPage}/>
             <Route path="/contact-us" component={()=>(<div>Contact Us Page Found!</div>)}/>
             <Route path="*" component={()=>(<div>No Match Found!</div>)} />

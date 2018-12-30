@@ -153,25 +153,25 @@ class DownloadPage extends React.Component {
             {
                 key: "date",
                 name: "DATE",
-                width: 250,
+                width: 200,
                 editable: false
             },
             {
                 "key": "day",
                 "name": "DAY",
-                "width": 250,
+                "width": 200,
                 "editable": false
             },
             {
                 "key": "crown cap 200ml",
                 "name": "crown cap 200ml",
-                "width": 250,
+                "width": 210,
                 "editable": false
             },
             {
                 "key": "crown cap 250ml",
                 "name": "crown cap 250ml",
-                "width": 250,
+                "width": 210,
                 "editable": false
             },
             {
@@ -213,11 +213,11 @@ class DownloadPage extends React.Component {
     }
     constructGridData = (data) => {
         let rowData = [];
-        let value = [];
-        let columnConfigDetails2 = [], rowDataDetails2 = [];
+        let rawValue = [];
+        let rowDataDetails2 = [];
         // **********construct data for grid  ********
         data.map((obj) => {
-            value.push({
+            rawValue.push({
                 rate: obj.rate ? !(Number.isNaN(Number.parseInt(obj.rate))) ?
                     parseInt(obj.rate) : 0 : 0,
                 bottleType: obj.bottle_type ? obj.bottle_type : "",
@@ -230,7 +230,7 @@ class DownloadPage extends React.Component {
             });
         });
         // **********construct columnConfig for grid 2 ********
-        if (!_.isEmpty(value)) {
+      /*  if (!_.isEmpty(value)) {
             this.bottleTypes = value;
             columnConfigDetails2.push(
                 {
@@ -263,22 +263,28 @@ class DownloadPage extends React.Component {
                 );
             });
             this.setState({ columnConfigDetails2 });
-        }
-
-        let groupValue = _.groupBy(value, "bottleType");
-        let objValue = _.reduce(Object.keys(groupValue), function (o, v) { return o[v] = 0, o; }, {});
-        let resultData = _.reduce(groupValue, function (obj, val, key) { obj[key] += val[0].noOfBottles; return obj }, objValue);
-        rowDataDetails2.push({ ...resultData, "date": value[0].date, "day": value[0].day, "id": 1 });
-        let totalBottles = _.reduce(value, function (obj, val) { obj.sum += val.noOfBottles; return obj }, { sum: 0 });
-        let bottleProducedFor = _.reduce(value, function (obj, val) { obj.sum += parseInt(val.noOfBottles * val.rate); return obj }, { sum: 0 });
-        let emplyeeCost = _.reduce(value, function (obj, val) { obj.sum += val.employeeCost; return obj }, { sum: 0 });
-        rowData.push({
-            "id": 1,
-            "date": value[0].date,
-            "day": value[0].day,
-            "total-bottles": totalBottles.sum ? totalBottles.sum : 0,
-            "bottles-producedfor": bottleProducedFor.sum ? bottleProducedFor.sum : 0,
-            "employee-cost": emplyeeCost.sum ? emplyeeCost.sum : 0
+        }*/
+        // group vlaue by date and map following data manupulations
+        let groupedDateValue = _.groupBy(rawValue, "date");
+        let keyValues = Object.keys(groupedDateValue);
+        let groupValue = null;
+        keyValues.map((obj, index)=>{
+            let value = groupedDateValue[obj];
+            groupValue = _.groupBy(value, "bottleType");
+            let objValue = _.reduce(Object.keys(groupValue), function (o, v) { return o[v] = 0, o; }, {});
+            let resultData = _.reduce(groupValue, function (obj, val, key) { obj[key] += val[0].noOfBottles; return obj }, objValue);
+            rowDataDetails2.push({ ...resultData, "date": value[0].date, "day": value[0].day, "id": index+1 });
+            let totalBottles = _.reduce(value, function (obj, val) { obj.sum += val.noOfBottles; return obj }, { sum: 0 });
+            let bottleProducedFor = _.reduce(value, function (obj, val) { obj.sum += parseInt(val.noOfBottles * val.rate); return obj }, { sum: 0 });
+            let emplyeeCost = _.reduce(value, function (obj, val) { obj.sum += val.employeeCost; return obj }, { sum: 0 });
+            rowData.push({
+                "id": index+1,
+                "date": value[0].date,
+                "day": value[0].day,
+                "total-bottles": totalBottles.sum ? totalBottles.sum : 0,
+                "bottles-producedfor": bottleProducedFor.sum ? bottleProducedFor.sum : 0,
+                "employee-cost": emplyeeCost.sum ? emplyeeCost.sum : 0
+            });
         });
         if (!_.isEmpty(rowDataDetails2) && Object.keys(groupValue).length !== 0) {
             this.constructVictryPieData(rowDataDetails2, Object.keys(groupValue));
@@ -432,12 +438,12 @@ class DownloadPage extends React.Component {
                         <Modal.Body id='printarea'>
                             <div className="piechart-view" ref={(cl) => this.pieChartDiv = cl}>
                                 <div style={pieStyle}>
-                                    <VictoryPie
+                                    {!_.isEmpty(this.state.pieChartData)?<VictoryPie
                                         data={this.state.pieChartData}
                                         colorScale={this.colorOptions}
                                         width={270}
                                         height={270}
-                                    />
+                                    />: <div className="no-data-label"><h3>No Data Available.</h3></div>}
                                 </div>
                                 <div style={{ position: "absolute", width: "100%", height: "400px", top: "30%" }}>
                                     <VictoryLegend
@@ -531,10 +537,10 @@ class DownloadPage extends React.Component {
                                 <Workbook.Sheet data={this.state.inHouseData ? this.state.inHouseData : []} name="In House Data">
                                     {!_.isEmpty(this.inHousePageColumnConfig) ? this.getWorkBookDetails(this.inHousePageColumnConfig) : null}
                                 </Workbook.Sheet>
-                                <Workbook.Sheet data={this.state.rowData ? this.state.rowData : []} name="Details 1">
+                                <Workbook.Sheet data={this.state.rowData ? this.state.rowData : []} name="Manufacturing Cost Details">
                                     {!_.isEmpty(this.state.columnsConfig) ? this.getWorkBookDetails(this.state.columnsConfig) : null}
                                 </Workbook.Sheet>
-                                <Workbook.Sheet data={this.state.rowDataDetails2 ? this.state.rowDataDetails2 : []} name="Details 2">
+                                <Workbook.Sheet data={this.state.rowDataDetails2 ? this.state.rowDataDetails2 : []} name="Bottle Details ">
                                     {!_.isEmpty(this.state.columnConfigDetails2) ? this.getWorkBookDetails(this.state.columnConfigDetails2) : null}
                                 </Workbook.Sheet>
                             </Workbook>
@@ -546,7 +552,7 @@ class DownloadPage extends React.Component {
                         columns={!_.isEmpty(this.state.columnsConfig) ? this.state.columnsConfig : []}
                         rowGetter={this.rowGetter}
                         rowsCount={this.state.rowData ? this.state.rowData.length : 0}
-                        minHeight={150}
+                        minHeight={170}
                         onGridRowsUpdated={this.handleGridRowsUpdated}
                     // onRowClick={this.onRowClick}
                     // rowSelection={{
@@ -570,7 +576,7 @@ class DownloadPage extends React.Component {
                         columns={!_.isEmpty(this.state.columnConfigDetails2) ? this.state.columnConfigDetails2 : []}
                         rowGetter={this.rowGetterForDetails2}
                         rowsCount={this.state.rowDataDetails2 ? this.state.rowDataDetails2.length : 0}
-                        minHeight={150}
+                        minHeight={170}
                         onGridRowsUpdated={this.handleGridRowsUpdated}
                     // onRowClick={this.onRowClick}
                     // rowSelection={{

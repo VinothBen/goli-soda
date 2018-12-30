@@ -1,61 +1,61 @@
-import supplyConstants from "./SupplyPage.Constants";
+import bottleReturnsConstants from "./BottleReturnsPage.Constants";
 
 
-export const supplyColumnConfig = (data) => {
+export const bottleReturnsColumnConfig = (data) => {
     return {
-        type: supplyConstants.SUPPLY_COLUMN_CONFIG_UPDATE_DATA,
+        type: bottleReturnsConstants.BOTTLE_RETURNS_COLUMN_CONFIG_UPDATE_DATA,
         data
     };
 }
 
 
-export const showSupplySpinner = (data) => {
+export const showBottleReturnsSpinner = (data) => {
     return {
-        type: supplyConstants.SHOW_SUPPLY_SPINNER,
+        type: bottleReturnsConstants.SHOW_BOTTLE_RETURNS_SPINNER,
         data
     };
 }
 
 export const showDownloadSpinner = (data) => {
     return {
-        type: supplyConstants.SHOW_DOWNLOAD_SPINNER,
+        type: bottleReturnsConstants.SHOW_DOWNLOAD_SPINNER,
         data
     };
 }
 
-export const showSupplyPopUpModel = (flagStatus, message) => {
+export const showBottleReturnsPopUpModel = (flagStatus, message) => {
     return {
-        type: supplyConstants.SHOW_SUPPLY_POPUPMODEL,
+        type: bottleReturnsConstants.SHOW_BOTTLE_RETURNS_POPUPMODEL,
         showPopUpModel: flagStatus,
         message: message
     };
 }
 
-export const getSupplyPageDetailsSuccess = (data) => {
-    let supplyData = data[0] ? data[0].supplyData : [];
+export const getBottleReturnsDetailsSuccess = (data) => {
+    let bottleReturnsData = data[0] ? data[0].BottleReturnsData : [];
     return {
-        type: supplyConstants.GET_SUPPLY_DATA_SUCCESS,
-        data: supplyData
+        type: bottleReturnsConstants.GET_BOTTLE_RETURNS_DATA_SUCCESS,
+        data: bottleReturnsData
     }
 }
 
-export const getSupplyPageDetailsFailure = () => {
+export const getBottleReturnsDetailsFailure = () => {
     return {
-        type: supplyConstants.GET_SUPPLY_DATA_FAILURE,
+        type: bottleReturnsConstants.GET_BOTTLE_RETURNS_DATA_FAILURE,
         errorMessage: "Some Thing Went Wrong!"
     }
 }
 
-export const updateSupplyPageGridData = (data) => {
+export const updateBottleReturnsGridData = (data) => {
     return {
-        type: supplyConstants.UPDATE_SUPPLY_GRID_DATA,
+        type: bottleReturnsConstants.UPDATE_BOTTLE_RETURNS_GRID_DATA,
         data
     };
 }
 
-export const getSupplyPageDetails = (url, tokenValue) => {
+export const getBottleReturnsDetails = (url, tokenValue) => {
     return (dispatch) => {
-        dispatch(showSupplySpinner(true));
+        dispatch(showBottleReturnsSpinner(true));
         url = decodeURIComponent(url);
         let headerValue = {
             method: 'GET',
@@ -66,31 +66,31 @@ export const getSupplyPageDetails = (url, tokenValue) => {
         };
         let requestURL = new Request(url, headerValue);
         fetch(requestURL).then((response) => {
-           if (response.status >= 400) {
-                dispatch(showSupplySpinner(false));
+            if (response.status >= 400) {
+                dispatch(showBottleReturnsSpinner(false));
                 dispatch(onErrorSearchDetails({message:response.statusText.toString(), type:"error"}));
             } else {
                 return response.json();
             }
         }).then(
             function (json) {
-                dispatch(getSupplyPageDetailsSuccess(json));
-                dispatch(showSupplySpinner(false));
+                dispatch(getBottleReturnsDetailsSuccess(json));
+                dispatch(showBottleReturnsSpinner(false));
             }
         ).catch(() => {
-            dispatch(showSupplySpinner(false));
+            dispatch(showBottleReturnsSpinner(false));
         })
     }
 }
 
 export const onErrorSearchDetails = (data) => {
     return {
-        type: supplyConstants.ERROR_MESSAGE_WHILE_SEARCHING,
+        type: bottleReturnsConstants.ERROR_MESSAGE_WHILE_SEARCHING,
         data
     }
 }
 
-export const saveSupplyData = (url, postData, tokenValue) => {
+export const saveBottleReturnsData = (url, postData, tokenValue) => {
     return (dispatch) => {
         url = decodeURIComponent(url);
         let myHeaders = new Headers(
@@ -120,4 +120,3 @@ export const saveSupplyData = (url, postData, tokenValue) => {
         .catch(() => dispatch(onErrorSearchDetails({message:"Save failed.", type:"error"})));
     }
 }
-

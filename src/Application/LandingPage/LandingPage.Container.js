@@ -7,7 +7,7 @@ export default connect(
        return {
                 data: state.landingPageReducer.data,
                 token: state.landingPageReducer.token,
-                username: state.landingPageReducer.username,
+                userDetails: state.landingPageReducer.userDetails,
                 errorMessage: state.landingPageReducer.errorMessage,
               };
 },

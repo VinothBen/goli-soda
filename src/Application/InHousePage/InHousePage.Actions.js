@@ -149,6 +149,15 @@ export const saveInHouseData = (url, postData, tokenValue) => {
         };
         let myRequest = new Request(url, myInit);
         fetch(myRequest).then(res => res.json())
-            .catch(error => dispatch(onErrorSearchDetails("Save failed."+ error)));
+            .then(data => {
+                if (data.errors && data.errors.error && data.errors.error.status >= 400) {
+                    dispatch(onErrorSearchDetails({ message: "Save failed - " + data.errors.message, type: "error" }));
+                } else if (data && data.message) {
+                    dispatch(onErrorSearchDetails({ message: data.message, type: "success" }));
+                } else {
+                    dispatch(onErrorSearchDetails({ message: "Save failed.", type: "error" }));
+                }
+            })
+            .catch(() => dispatch(onErrorSearchDetails({ message: "Save failed.", type: "error" })));
     }
 }

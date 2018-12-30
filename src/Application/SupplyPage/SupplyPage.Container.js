@@ -11,14 +11,15 @@ export default connect(
                 showSpinner: state.supplyPageReducer.showSpinner,
                 showPopUpModel: state.supplyPageReducer.showPopUpModel,
                 popUpMessage: state.supplyPageReducer.popUpMessage,
+                searchErrorMessage: state.supplyPageReducer.searchErrorMessage,
                 token: state.landingPageReducer.token,
-                username: state.landingPageReducer.username,
+                userDetails: state.landingPageReducer.userDetails,
                 errorMessage: state.landingPageReducer.errorMessage,
               };
 },
     (dispatch)=>{
         return {
-            actions: bindActionCreators(supplyPageActions, dispatch)
+            supplyActions: bindActionCreators(supplyPageActions, dispatch)
         };
 }
 )(SupplyPage);

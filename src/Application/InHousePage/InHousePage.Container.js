@@ -12,8 +12,8 @@ export default connect(
                 showPopUpModel: state.inHousePageReducer.showPopUpModel,
                 popUpMessage: state.inHousePageReducer.popUpMessage,
                 token: state.landingPageReducer.token,
-                username: state.landingPageReducer.username,
-                errorMessage: state.landingPageReducer.errorMessage,
+                userDetails: state.landingPageReducer.userDetails,
+                searchErrorMessage: state.landingPageReducer.searchErrorMessage,
               };
 },
     (dispatch)=>{
