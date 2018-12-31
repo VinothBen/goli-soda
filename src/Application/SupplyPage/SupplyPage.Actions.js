@@ -66,16 +66,22 @@ export const getSupplyPageDetails = (url, tokenValue) => {
         };
         let requestURL = new Request(url, headerValue);
         fetch(requestURL).then((response) => {
-           if (response.status >= 400) {
+            if (response.status >= 400) {
                 dispatch(showSupplySpinner(false));
-                dispatch(onErrorSearchDetails({message:response.statusText.toString(), type:"error"}));
+                dispatch(onErrorSearchDetails({ message: response.statusText.toString(), type: "error" }));
             } else {
                 return response.json();
             }
         }).then(
             function (json) {
-                dispatch(getSupplyPageDetailsSuccess(json));
-                dispatch(showSupplySpinner(false));
+                if (json && json.message) {
+                    // dispatch(onErrorSearchDetails(json));
+                    dispatch(onErrorSearchDetails({ message: json.message.toString(), type: "error" }));
+                    dispatch(showSupplySpinner(false));
+                } else {
+                    dispatch(getSupplyPageDetailsSuccess(json));
+                    dispatch(showSupplySpinner(false));
+                }
             }
         ).catch(() => {
             dispatch(showSupplySpinner(false));
@@ -108,16 +114,16 @@ export const saveSupplyData = (url, postData, tokenValue) => {
         };
         let myRequest = new Request(url, myInit);
         fetch(myRequest).then(res => res.json())
-        .then(data=>{
-            if(data.errors && data.errors.error && data.errors.error.status >= 400){
-                dispatch(onErrorSearchDetails({message:"Save failed - "+data.errors.message, type:"error"}));
-            }else if(data && data.message){
-                dispatch(onErrorSearchDetails({message:data.message, type:"success"}));
-            } else {
-                dispatch(onErrorSearchDetails({message:"Save failed.", type:"error"}));
-            }
-        })
-        .catch(() => dispatch(onErrorSearchDetails({message:"Save failed.", type:"error"})));
+            .then(data => {
+                if (data.errors && data.errors.error && data.errors.error.status >= 400) {
+                    dispatch(onErrorSearchDetails({ message: "Save failed - " + data.errors.message, type: "error" }));
+                } else if (data && data.message) {
+                    dispatch(onErrorSearchDetails({ message: data.message, type: "success" }));
+                } else {
+                    dispatch(onErrorSearchDetails({ message: "Save failed.", type: "error" }));
+                }
+            })
+            .catch(() => dispatch(onErrorSearchDetails({ message: "Save failed.", type: "error" })));
     }
 }
 

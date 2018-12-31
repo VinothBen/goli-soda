@@ -52,8 +52,8 @@ class BottleReturnsPage extends React.Component {
         if (_.isEmpty(this.props.userDetails) && !this.props.token) {
             hashHistory.push("/login");
         } else {
-            const url = "http://localhost:3010/api/getBottleReturnsData?date=" + this.props.userDetails.lastSavedDateForBottleReturns.toString();
-            // let url = "https://goli-soda-services.herokuapp.com/api/getBottleReturnsData?date="+  this.props.userDetails.lastSavedDateForBottleReturns.toString();
+            // const url = "http://localhost:3010/api/getBottleReturnsData?date=" + this.props.userDetails.lastSavedDateForBottleReturns.toString();
+            let url = "https://goli-soda-services.herokuapp.com/api/getBottleReturnsData?date="+ this.props.userDetails.lastSavedDateForBottleReturns.toString();
             this.columnsConfig = [
                 {
                     key: 'id',
@@ -175,8 +175,8 @@ class BottleReturnsPage extends React.Component {
     onClickSave = () => {
         if (!_.isEmpty(this.props.userDetails) && this.props.username) {
             let newObjects = [];
-            let SaveURL = "http://localhost:3010/api/bottleReturns-saveData";
-            // let SaveURL = "https://goli-soda-services.herokuapp.com/api/bottleReturns-saveData";
+            // let SaveURL = "http://localhost:3010/api/bottleReturns-saveData";
+            let SaveURL = "https://goli-soda-services.herokuapp.com/api/bottleReturns-saveData";
             let rowData = _.cloneDeep(this.state.rowData);
             if (!_.isEmpty(rowData) && !_.isEmpty(this.props.updatedGridData) && !_.isEqual(rowData, this.props.updatedGridData)) {
                 newObjects = _.differenceWith(rowData, this.props.updatedGridData, (obj1, obj2) => { return obj1.id === obj2.id });
@@ -285,8 +285,8 @@ class BottleReturnsPage extends React.Component {
 
     onClickRefresh = () => {
         if (!_.isEmpty(this.props.userDetails) && !_.isEmpty(this.props.token)) {
-            let URL = "http://localhost:3010/api/getBottleReturnsData?date=" + this.props.userDetails.lastSavedDateForBottleReturns.toString();
-            // let URL = "https://goli-soda-services.herokuapp.com/api/getBottleReturnsData?date="+ this.props.userDetails.lastSavedDateForBottleReturns.toString();
+            // let URL = "http://localhost:3010/api/getBottleReturnsData?date=" + this.props.userDetails.lastSavedDateForBottleReturns.toString();
+            let URL = "https://goli-soda-services.herokuapp.com/api/getBottleReturnsData?date="+ this.props.userDetails.lastSavedDateForBottleReturns.toString();
             this.setState({ rowData: [], redoStack: [], undoStack: [] });
             this.props.bottleReturnActions.updateBottleReturnsGridData([]);
             this.props.bottleReturnActions.getBottleReturnsDetails(URL, this.props.token.toString());
@@ -328,6 +328,7 @@ class BottleReturnsPage extends React.Component {
                         rowGetter={this.rowGetter}
                         rowsCount={this.state.rowData ? this.state.rowData.length : 0}
                         minHeight={350}
+                        minWidth={1450}
                         onGridRowsUpdated={this.handleGridRowsUpdated}
                         onRowClick={this.onRowClick}
                         rowSelection={{

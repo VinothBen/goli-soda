@@ -10,7 +10,7 @@ export default connect(
             updatedGridData: state.inHousePageReducer.updatedGridData,
             showDownaloadPageSpinner: state.inHousePageReducer.showDownaloadPageSpinner,
             token: state.landingPageReducer.token,
-            username: state.landingPageReducer.username,
+            userDetails: state.landingPageReducer.userDetails,
             errorMessage: state.landingPageReducer.errorMessage,
             searchDetailsByDate: state.inHousePageReducer.searchDetailsByDate,
             searchErrorMessage: state.inHousePageReducer.searchErrorMessage

@@ -108,15 +108,15 @@ export const getSearchDetailsByDate = (url, tokenValue) => {
         fetch(requestURL).then((response) => {
             if (response.status >= 400) {
                 dispatch(showDownloadSpinner(false));
-                dispatch(onErrorSearchDetails({ message: "Bad Response From Server." }));
-                throw new Error("Bad Response From Server!");
+                dispatch(onErrorSearchDetails({message:response.statusText.toString(), type:"error"}));
             } else {
                 return response.json();
             }
         }).then(
             function (json) {
                 if (json && json.message) {
-                    dispatch(onErrorSearchDetails(json));
+                    // dispatch(onErrorSearchDetails(json));
+                    dispatch(onErrorSearchDetails({message: json.message.toString(), type:"error"}));
                     dispatch(showDownloadSpinner(false));
                 } else {
                     dispatch(successOnSearchDetailsByDate(json));

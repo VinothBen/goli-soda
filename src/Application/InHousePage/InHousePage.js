@@ -139,8 +139,8 @@ class InHousePage extends React.Component {
                 this.props.inHousePageActions.inHousePageColumnConfig(columnsConfig);
             }
             if (_.isEmpty(this.props.initialGridData) && this.props.token) {
-                let URL = "http://localhost:3010/api/inhouse-getdata?date="+ this.props.userDetails.lastSavedDateForInhouse.toString();
-                // let URL = "https://goli-soda-services.herokuapp.com/api/inhouse-getdata?date=" + this.props.userDetails.lastSavedDateForInhouse.toString();
+                // let URL = "http://localhost:3010/api/inhouse-getdata?date="+ this.props.userDetails.lastSavedDateForInhouse.toString();
+                let URL = "https://goli-soda-services.herokuapp.com/api/inhouse-getdata?date=" + this.props.userDetails.lastSavedDateForInhouse.toString();
                 this.props.inHousePageActions.getInHousePageDetails(URL, this.props.token);
             }
 
@@ -390,8 +390,8 @@ class InHousePage extends React.Component {
     }
     onClickRefresh = () => {
         if (!_.isEmpty(this.props.userDetails) && !_.isEmpty(this.props.token)) {
-            let URL = "http://localhost:3010/api/inhouse-getdata?date="+ this.props.userDetails.lastSavedDateForInhouse.toString();
-            // let URL = "https://goli-soda-services.herokuapp.com/api/inhouse-getdata?date="+ this.props.userDetails.lastSavedDateForInhouse.toString();
+            // let URL = "http://localhost:3010/api/inhouse-getdata?date="+ this.props.userDetails.lastSavedDateForInhouse.toString();
+            let URL = "https://goli-soda-services.herokuapp.com/api/inhouse-getdata?date="+ this.props.userDetails.lastSavedDateForInhouse.toString();
             this.setState({ rowData: [], redoStack: [], undoStack:[] });
             this.props.inHousePageActions.updateInHousePageGridData([]);
             this.props.inHousePageActions.getInHousePageDetails(URL, this.props.token.toString());
@@ -433,6 +433,7 @@ class InHousePage extends React.Component {
                         rowGetter={this.rowGetter}
                         rowsCount={this.state.rowData ? this.state.rowData.length : 0}
                         minHeight={350}
+                        minWidth={1450}
                         onGridRowsUpdated={this.handleGridRowsUpdated}
                         onRowClick={this.onRowClick}
                         rowSelection={{

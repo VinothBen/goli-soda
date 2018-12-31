@@ -7,7 +7,7 @@ import { FadeLoader } from 'react-spinners';
 import Workbook from 'react-excel-workbook';
 import { hashHistory } from "react-router";
 import { VictoryLegend, VictoryPie } from "victory";
-import { Modal, Button } from "react-bootstrap";
+import { Modal, Button, ToggleButtonGroup, ToggleButton } from "react-bootstrap";
 // import moment from "moment";
 // import ReactToPrint from "react-to-print";
 
@@ -25,15 +25,16 @@ class DownloadPage extends React.Component {
             showDatePicker: false,
             rowData: [],
             columnsConfig: [],
+            columnConfigDetailsForInHouse2: [],
             isDateSelected: false,
             showDateWarning: false,
             showSpinner: false,
-            columnConfigDetails2: [],
             rowDataDetails2: [],
             inHouseData: [],
             showModel: false,
             pieChartData: [],
-            pieChartLegendData: []
+            pieChartLegendData: [],
+            downloadOptionValue: 1
         };
         this.bottleTypes = [];
         this.rowData = [
@@ -97,15 +98,7 @@ class DownloadPage extends React.Component {
             }
         ];
         this.colorOptions = ["navy", "orange", "gold", "cyan", "tomato", "lightgreen"];
-    }
-    componentWillMount() {
-        if (!_.isEmpty(this.props) && !this.props.username && !this.props.token) {
-            hashHistory.push("/login");
-        }
-        // if(!_.isEmpty(this.props.searchDetailsByDate) && _.has(this.props, "searchDetailsByDate[0].inHouseData")){
-        //     this.setState({showSpinner: false});
-        // }
-        let columnsConfig = [
+        this.columnsConfigForInHouse = [
             {
                 key: 'id',
                 name: 'S.NO',
@@ -115,19 +108,19 @@ class DownloadPage extends React.Component {
             {
                 key: 'date',
                 name: 'DATE',
-                width: 250,
+                width: 230,
                 editable: false
             },
             {
                 key: 'day',
                 name: 'DAY',
-                width: 250,
+                width: 230,
                 editable: false
             },
             {
                 key: 'total-bottles',
                 name: 'TOTAL BOTTLES',
-                width: 250,
+                width: 240,
                 editable: false
             },
             {
@@ -143,7 +136,130 @@ class DownloadPage extends React.Component {
                 editable: false
             }
         ];
-        let columnConfigDetails2 = [
+        this.columnConfigForSupply = [
+            {
+                key: 'id',
+                name: 'S.NO',
+                width: 50
+            },
+            {
+                key: 'date',
+                name: 'DATE',
+                editable: true,
+                format: "date"
+            },
+            {
+                key: 'day',
+                name: 'DAY',
+                editor: this.DaysDropDownValue,
+                format: "string"
+            },
+            {
+                key: 'bottle_type',
+                name: 'BOTTLE TYPE',
+                editor: this.BottleType,
+                format: "string"
+            },
+            {
+                key: 'total_bottles',
+                name: 'TOTAL BOTTLES',
+                editable: true,
+                format: "number"
+            },
+            {
+                key: 'type_of_supply',
+                name: 'TYPE OF SUPPLY',
+                editable: true,
+                format: "string"
+            },
+            {
+                key: 'area',
+                name: 'AREA',
+                editable: true,
+                format: "string"
+            },
+            {
+                key: 'type_of_vehicle',
+                name: 'TYPE OF VEHICLE',
+                editable: true,
+                format: "string"
+            },
+            {
+                key: 'fuel_cost',
+                name: 'FUEL-COST',
+                editable: true,
+                format: "number"
+            },
+            {
+                key: 'employee_wage',
+                name: 'EMPLOYEE - WAGE',
+                editable: true,
+                format: "number"
+            }
+        ];
+        this.columnConfigForBottleReturns = [
+            {
+                key: 'id',
+                name: 'S.NO',
+                width: 50
+            },
+            {
+                key: 'date',
+                name: 'DATE',
+                editable: true,
+                format: "date"
+            },
+            {
+                key: 'day',
+                name: 'DAY',
+                editor: this.DaysDropDownValue,
+                format: "string"
+            },
+            {
+                key: 'area',
+                name: 'AREA',
+                editable: true,
+                format: "string"
+
+            },
+            {
+                key: 'bottle_type',
+                name: 'BOTTLE TYPE',
+                editor: this.BottleType,
+                format: "string"
+            },
+            {
+                key: 'delivered_bottles',
+                name: 'DELEVERED BOTTLES',
+                editable: true,
+                format: "string"
+
+            },
+            {
+                key: 'empty_bottles_count',
+                name: 'EMPTY BOTTLES COUNT',
+                editable: true,
+                format: "string"
+
+            },
+            {
+                key: 'return_bottles',
+                name: 'RETURN BOTTLES',
+                editable: true,
+                format: "string"
+
+            }
+        ];
+
+    }
+    componentWillMount() {
+        if (_.isEmpty(this.props.userDetails) && !this.props.token) {
+            hashHistory.push("/login");
+        }
+        // if(!_.isEmpty(this.props.searchDetailsByDate) && _.has(this.props, "searchDetailsByDate[0].inHouseData")){
+        //     this.setState({showSpinner: false});
+        // }
+        let columnConfigDetailsForInHouse2 = [
             {
                 "key": "id",
                 "name": "S.NO",
@@ -187,25 +303,43 @@ class DownloadPage extends React.Component {
                 "editable": false
             }
         ];
-        this.setState({ rowData: this.rowData, columnsConfig, columnConfigDetails2, rowDataDetails2: this.rowDataDetails2 });
+        this.setState({
+            rowData: this.rowData, columnsConfig: this.columnsConfigForInHouse,
+            columnConfigDetailsForInHouse2, rowDataDetails2: this.rowDataDetails2
+        });
         if (!_.isEmpty(this.props.searchDetailsByDate)) {
-            if (_.has(this.props, "searchDetailsByDate[0].inHouseData") && !_.isEmpty(this.props.searchDetailsByDate[0].inHouseData)) {
-                this.setState({ inHouseData: _.get(this.props, "searchDetailsByDate[0].inHouseData") });
+            if (_.has(this.props, "searchDetailsByDate[0].inHouseData") &&
+                !_.isEmpty(this.props.searchDetailsByDate[0].inHouseData) && this.state.downloadOptionValue === 1) {
+                this.setState({ inHouseData: _.get(this.props, "searchDetailsByDate[0].inHouseData"), columnsConfig: this.columnsConfigForInHouse });
                 this.constructGridData(_.get(this.props, "searchDetailsByDate[0].inHouseData"));
+            } else if (_.has(this.props, "searchDetailsByDate[0].supplyData") &&
+                !_.isEmpty(this.props.searchDetailsByDate[0].supplyData) && this.state.downloadOptionValue === 2) {
+                this.setState({ rowData: _.get(this.props, "searchDetailsByDate[0].supplyData"), columnsConfig: this.columnConfigForSupply });
+            } else if (_.has(this.props, "searchDetailsByDate[0].BottleReturnsData") &&
+                !_.isEmpty(this.props.searchDetailsByDate[0].BottleReturnsData) && this.state.downloadOptionValue === 3) {
+                this.setState({ rowData: _.get(this.props, "searchDetailsByDate[0].BottleReturnsData"), columnsConfig: this.columnConfigForBottleReturns });
             }
         }
         // console.log("...props", this.props, new Date().toISOString());
     }
     componentWillReceiveProps(nextProps) {
         // console.log("...nextProps", nextProps);
-        if (!_.isEmpty(nextProps) && !nextProps.username && !nextProps.token) {
+        if (_.isEmpty(nextProps.userDetails) && !nextProps.token) {
             hashHistory.push("/login");
         }
         if (!_.isEmpty(nextProps.searchDetailsByDate) && !_.isEqual(this.props.searchDetailsByDate, nextProps.searchDetailsByDate)) {
-            if (_.has(nextProps, "searchDetailsByDate[0].inHouseData") && !_.isEmpty(nextProps.searchDetailsByDate[0].inHouseData)) {
-                this.setState({ inHouseData: _.get(nextProps, "searchDetailsByDate[0].inHouseData") });
+            if (_.has(nextProps, "searchDetailsByDate[0].inHouseData") &&
+                !_.isEmpty(nextProps.searchDetailsByDate[0].inHouseData) && this.state.downloadOptionValue === 1) {
+                this.setState({ inHouseData: _.get(nextProps, "searchDetailsByDate[0].inHouseData"), columnsConfig: this.columnsConfigForInHouse });
                 this.constructGridData(_.get(nextProps, "searchDetailsByDate[0].inHouseData"));
+            } else if (_.has(nextProps, "searchDetailsByDate[0].supplyData") &&
+                !_.isEmpty(nextProps.searchDetailsByDate[0].supplyData) && this.state.downloadOptionValue === 2) {
+                this.setState({ rowData: _.get(nextProps, "searchDetailsByDate[0].supplyData"), columnsConfig: this.columnConfigForSupply });
+            } else if (_.has(nextProps, "searchDetailsByDate[0].BottleReturnsData") &&
+                !_.isEmpty(nextProps.searchDetailsByDate[0].BottleReturnsData) && this.state.downloadOptionValue === 3) {
+                this.setState({ rowData: _.get(nextProps, "searchDetailsByDate[0].BottleReturnsData"), columnsConfig: this.columnConfigForBottleReturns });
             }
+
         }
         if (nextProps.searchErrorMessage.message) {
             this.setState({ rowData: this.rowData, rowDataDetails2: this.rowDataDetails2 });
@@ -230,55 +364,55 @@ class DownloadPage extends React.Component {
             });
         });
         // **********construct columnConfig for grid 2 ********
-      /*  if (!_.isEmpty(value)) {
-            this.bottleTypes = value;
-            columnConfigDetails2.push(
-                {
-                    key: 'id',
-                    name: 'S.NO',
-                    width: 50,
-                    editable: false
-                },
-                {
-                    key: "date",
-                    name: "DATE",
-                    width: 200,
-                    editable: false
-                },
-                {
-                    key: "day",
-                    name: "DAY",
-                    width: 200,
-                    editable: false
-                }
-            );
-            value.map((obj) => {
-                columnConfigDetails2.push(
-                    {
-                        key: obj.bottleType ? obj.bottleType : "",
-                        name: obj.bottleType ? obj.bottleType : "unknown type",
-                        width: 210,
-                        editable: false
-                    }
-                );
-            });
-            this.setState({ columnConfigDetails2 });
-        }*/
+        /*  if (!_.isEmpty(value)) {
+              this.bottleTypes = value;
+              columnConfigDetailsForInHouse2.push(
+                  {
+                      key: 'id',
+                      name: 'S.NO',
+                      width: 50,
+                      editable: false
+                  },
+                  {
+                      key: "date",
+                      name: "DATE",
+                      width: 200,
+                      editable: false
+                  },
+                  {
+                      key: "day",
+                      name: "DAY",
+                      width: 200,
+                      editable: false
+                  }
+              );
+              value.map((obj) => {
+                  columnConfigDetailsForInHouse2.push(
+                      {
+                          key: obj.bottleType ? obj.bottleType : "",
+                          name: obj.bottleType ? obj.bottleType : "unknown type",
+                          width: 210,
+                          editable: false
+                      }
+                  );
+              });
+              this.setState({ columnConfigDetailsForInHouse2 });
+          }*/
         // group vlaue by date and map following data manupulations
         let groupedDateValue = _.groupBy(rawValue, "date");
         let keyValues = Object.keys(groupedDateValue);
         let groupValue = null;
-        keyValues.map((obj, index)=>{
+        keyValues.map((obj, index) => {
             let value = groupedDateValue[obj];
             groupValue = _.groupBy(value, "bottleType");
             let objValue = _.reduce(Object.keys(groupValue), function (o, v) { return o[v] = 0, o; }, {});
             let resultData = _.reduce(groupValue, function (obj, val, key) { obj[key] += val[0].noOfBottles; return obj }, objValue);
-            rowDataDetails2.push({ ...resultData, "date": value[0].date, "day": value[0].day, "id": index+1 });
+            rowDataDetails2.push({ ...resultData, "date": value[0].date, "day": value[0].day, "id": index + 1 });
             let totalBottles = _.reduce(value, function (obj, val) { obj.sum += val.noOfBottles; return obj }, { sum: 0 });
             let bottleProducedFor = _.reduce(value, function (obj, val) { obj.sum += parseInt(val.noOfBottles * val.rate); return obj }, { sum: 0 });
             let emplyeeCost = _.reduce(value, function (obj, val) { obj.sum += val.employeeCost; return obj }, { sum: 0 });
             rowData.push({
-                "id": index+1,
+                "id": index + 1,
                 "date": value[0].date,
                 "day": value[0].day,
                 "total-bottles": totalBottles.sum ? totalBottles.sum : 0,
@@ -341,19 +475,37 @@ class DownloadPage extends React.Component {
         this.setState({ showDatePicker: !this.state.showDatePicker });
     }
     onClickSearch = () => {
-        if (this.state.isDateSelected && this.state.selectedDate) {
+        if (this.state.isDateSelected && this.state.selectedDate && this.state.downloadOptionValue) {
             if (this.state.selectedDate && this.state.dateSelection === "single") {
                 this.setState({ showDateWarning: false, showSpinner: true });
-                if (this.props.username && this.props.token) {
-                    // let  url = "http://localhost:3010/api/download-search?date=08-28-18";
-                    let url = "https://goli-soda-services.herokuapp.com/api/download-search?date=" + this.state.selectedDate;
+                let url = null;
+                if (this.state.downloadOptionValue === 1) {
+                    // url = "http://localhost:3010/api/download-search?date=" + this.state.selectedDate;
+                    url = "https://goli-soda-services.herokuapp.com/api/download-search?date=" + this.state.selectedDate;
+                } else if (this.state.downloadOptionValue === 2) {
+                    // url = "http://localhost:3010/api/download-search-supply?date=" + this.state.selectedDate;
+                    url = "https://goli-soda-services.herokuapp.com/api/download-search-supply?date=" + this.state.selectedDate;
+                } else if (this.state.downloadOptionValue === 3) {
+                    // url = "http://localhost:3010/api/download-search-br?date=" + this.state.selectedDate;
+                    url = "https://goli-soda-services.herokuapp.com/api/download-search-br?date=" + this.state.selectedDate;
+                }
+                if (!_.isEmpty(this.props.userDetails) && this.props.token && url) {
                     this.props.inHousePageActions.getSearchDetailsByDate(url, this.props.token);
                 }
             } else if (this.state.endDate && this.state.startDate && this.state.dateSelection === "range") {
                 this.setState({ showDateWarning: false, showSpinner: true });
-                if (this.props.username && this.props.token) {
-                    let url = "http://localhost:3010/api/download-search-MDates?start=" + this.state.startDate + "&end=" + this.state.endDate;
-                    // let url = "https://goli-soda-services.herokuapp.com/api/download-search-MDates?start=" + this.state.startDate+"&end=" + this.state.endDate;
+                let url = null;
+                if (this.state.downloadOptionValue === 1) {
+                    // url = "http://localhost:3010/api/download-search-MDates?start=" + this.state.startDate + "&end=" + this.state.endDate;
+                    url = "https://goli-soda-services.herokuapp.com/api/download-search-MDates?start=" + this.state.startDate+"&end=" + this.state.endDate;
+                } else if (this.state.downloadOptionValue === 2) {
+                    // url = "http://localhost:3010/api/download-search-supply-MDates?start=" + this.state.startDate + "&end=" + this.state.endDate;
+                    url = "https://goli-soda-services.herokuapp.com/api/download-search-supply-MDates?start=" + this.state.startDate+"&end=" + this.state.endDate;
+                } else if (this.state.downloadOptionValue === 3) {
+                    // url = "http://localhost:3010/api/download-search-br-MDates?start=" + this.state.startDate + "&end=" + this.state.endDate;
+                    url = "https://goli-soda-services.herokuapp.com/api/download-search-br-MDates?start=" + this.state.startDate+"&end=" + this.state.endDate;
+                }
+                if (!_.isEmpty(this.props.userDetails) && this.props.token && url) {
                     this.props.inHousePageActions.getSearchDetailsByDate(url, this.props.token);
                 }
             }
@@ -402,6 +554,9 @@ class DownloadPage extends React.Component {
             });
         }
     }
+    onChangeDataOptions = (e) => {
+        this.setState({ downloadOptionValue: e, rowData: this.rowData, rowDataDetails2: this.rowDataDetails2 });
+    }
     render() {
         let pieStyle = {
             float: "left",
@@ -411,6 +566,21 @@ class DownloadPage extends React.Component {
             position: "relative",
             bottom: "0px"
         };
+        let workBookName = "Default", gridWidth = 170;
+        switch (this.state.downloadOptionValue) {
+            case 1:
+                workBookName = "Manufacturing Cost Details";
+                gridWidth = 170;
+                break;
+            case 2:
+                workBookName = "Supply Data";
+                gridWidth = 450;
+                break;
+            case 3:
+                workBookName = "Bottle Returns Data";
+                gridWidth = 450;
+                break;
+        }
         return (
             <div className="download-page">
                 {
@@ -438,12 +608,12 @@ class DownloadPage extends React.Component {
                         <Modal.Body id='printarea'>
                             <div className="piechart-view" ref={(cl) => this.pieChartDiv = cl}>
                                 <div style={pieStyle}>
-                                    {!_.isEmpty(this.state.pieChartData)?<VictoryPie
+                                    {!_.isEmpty(this.state.pieChartData) ? <VictoryPie
                                         data={this.state.pieChartData}
                                         colorScale={this.colorOptions}
                                         width={270}
                                         height={270}
-                                    />: <div className="no-data-label"><h3>No Data Available.</h3></div>}
+                                    /> : <div className="no-data-label"><h3>No Data Available.</h3></div>}
                                 </div>
                                 <div style={{ position: "absolute", width: "100%", height: "400px", top: "30%" }}>
                                     <VictoryLegend
@@ -522,28 +692,53 @@ class DownloadPage extends React.Component {
                 </div>
                 {!_.isEmpty(this.props.searchErrorMessage) && this.props.searchErrorMessage.message ?
                     <div className="search-warning"><h4>{this.props.searchErrorMessage.message}</h4></div> : null}
+                <div className="download-options">
+                    <ToggleButtonGroup
+                        type="radio"
+                        name="options"
+                        defaultValue={1}
+                        value={this.state.downloadOptionValue}
+                        onChange={(e) => this.onChangeDataOptions(e)}
+                    >
+                        <ToggleButton value={1}>InHouse Data</ToggleButton>
+                        <ToggleButton value={2}>Supply Data</ToggleButton>
+                        <ToggleButton value={3}>BottleReturns Data</ToggleButton>
+                    </ToggleButtonGroup>
+                </div>
                 <div className="datagrid-container-1">
-                    <div className="grid-header-name"><h4>Manufacturing Cost Details:</h4>
-                        <button className="btn btn-sm btn-primary charview-button" onClick={() => this.setState({ showModel: true })}>
-                            <i className="fas fa-chart-pie"></i>Chart View</button>
+                    <div className="grid-header-name"><h4>{workBookName}:</h4>
+                        {
+                            this.state.downloadOptionValue === 1 ? <button className="btn btn-sm btn-primary charview-button" onClick={() => this.setState({ showModel: true })}>
+                                <i className="fas fa-chart-pie"></i>Chart View
+                        </button> : null
+                        }
                         {/* <button className="btn btn-sm btn-primary button-download">
                             <i className="glyphicon glyphicon-download-alt"></i>Download ExcelData</button> */}
                         <div>
-                            <Workbook filename="InHouseData.xlsx"
-                                element={
-                                    <button className="btn btn-sm btn-primary button-download">
-                                        <i className="fas fa-download"></i>Download ExcelData</button>
-                                }>
-                                <Workbook.Sheet data={this.state.inHouseData ? this.state.inHouseData : []} name="In House Data">
-                                    {!_.isEmpty(this.inHousePageColumnConfig) ? this.getWorkBookDetails(this.inHousePageColumnConfig) : null}
-                                </Workbook.Sheet>
-                                <Workbook.Sheet data={this.state.rowData ? this.state.rowData : []} name="Manufacturing Cost Details">
-                                    {!_.isEmpty(this.state.columnsConfig) ? this.getWorkBookDetails(this.state.columnsConfig) : null}
-                                </Workbook.Sheet>
-                                <Workbook.Sheet data={this.state.rowDataDetails2 ? this.state.rowDataDetails2 : []} name="Bottle Details ">
-                                    {!_.isEmpty(this.state.columnConfigDetails2) ? this.getWorkBookDetails(this.state.columnConfigDetails2) : null}
-                                </Workbook.Sheet>
-                            </Workbook>
+                            {
+                                this.state.downloadOptionValue === 1 ? <Workbook filename="Kannan_Soda.xlsx"
+                                    element={
+                                        <button className="btn btn-sm btn-primary button-download">
+                                            <i className="fas fa-download"></i>Download ExcelData</button>
+                                    }>
+                                    <Workbook.Sheet data={this.state.rowData ? this.state.rowData : []} name={workBookName}>
+                                        {!_.isEmpty(this.state.columnsConfig) ? this.getWorkBookDetails(this.state.columnsConfig) : null}
+                                    </Workbook.Sheet>
+                                    <Workbook.Sheet data={this.state.rowDataDetails2 ? this.state.rowDataDetails2 : []} name="Bottle Details ">
+                                        {!_.isEmpty(this.state.columnConfigDetailsForInHouse2) ? this.getWorkBookDetails(this.state.columnConfigDetailsForInHouse2) : null}
+                                    </Workbook.Sheet>
+                                    <Workbook.Sheet data={this.state.inHouseData ? this.state.inHouseData : []} name="In House Data">
+                                        {!_.isEmpty(this.inHousePageColumnConfig) ? this.getWorkBookDetails(this.inHousePageColumnConfig) : null}
+                                    </Workbook.Sheet>
+                                </Workbook> : <Workbook filename="Kannan_Soda.xlsx"
+                                    element={
+                                        <button className="btn btn-sm btn-primary button-download">
+                                            <i className="fas fa-download"></i>Download ExcelData</button>
+                                    }>
+                                        <Workbook.Sheet data={this.state.rowData ? this.state.rowData : []} name={workBookName}>
+                                            {!_.isEmpty(this.state.columnsConfig) ? this.getWorkBookDetails(this.state.columnsConfig) : null}
+                                        </Workbook.Sheet>
+                                    </Workbook>}
                         </div>
                     </div>
                     <ReactDataGrid
@@ -552,7 +747,8 @@ class DownloadPage extends React.Component {
                         columns={!_.isEmpty(this.state.columnsConfig) ? this.state.columnsConfig : []}
                         rowGetter={this.rowGetter}
                         rowsCount={this.state.rowData ? this.state.rowData.length : 0}
-                        minHeight={170}
+                        minHeight={gridWidth}
+                        minWidth={1260}
                         onGridRowsUpdated={this.handleGridRowsUpdated}
                     // onRowClick={this.onRowClick}
                     // rowSelection={{
@@ -566,30 +762,32 @@ class DownloadPage extends React.Component {
                     // }}
                     />
                 </div>
-                <div className="datagrid-container-2">
-                    <div className="grid-header-name">
-                        <h4>Bottle Details :</h4>
-                    </div>
-                    <ReactDataGrid
-                        rowKey="id"
-                        enableCellSelect={false}
-                        columns={!_.isEmpty(this.state.columnConfigDetails2) ? this.state.columnConfigDetails2 : []}
-                        rowGetter={this.rowGetterForDetails2}
-                        rowsCount={this.state.rowDataDetails2 ? this.state.rowDataDetails2.length : 0}
-                        minHeight={170}
-                        onGridRowsUpdated={this.handleGridRowsUpdated}
-                    // onRowClick={this.onRowClick}
-                    // rowSelection={{
-                    //     showCheckbox: false,
-                    //     enableShiftSelect: true,
-                    //     onRowsSelected: this.onRowsSelected,
-                    //     onRowsDeselected: this.onRowsDeselected,
-                    //     selectBy: {
-                    //         indexes: this.state.selectedIndexes
-                    //     }
-                    // }}
-                    />
-                </div>
+                {
+                    this.state.downloadOptionValue === 1 ? <div className="datagrid-container-2">
+                        <div className="grid-header-name">
+                            <h4>Bottle Details :</h4>
+                        </div>
+                        <ReactDataGrid
+                            rowKey="id"
+                            enableCellSelect={false}
+                            columns={!_.isEmpty(this.state.columnConfigDetailsForInHouse2) ? this.state.columnConfigDetailsForInHouse2 : []}
+                            rowGetter={this.rowGetterForDetails2}
+                            rowsCount={this.state.rowDataDetails2 ? this.state.rowDataDetails2.length : 0}
+                            minHeight={170}
+                            onGridRowsUpdated={this.handleGridRowsUpdated}
+                        // onRowClick={this.onRowClick}
+                        // rowSelection={{
+                        //     showCheckbox: false,
+                        //     enableShiftSelect: true,
+                        //     onRowsSelected: this.onRowsSelected,
+                        //     onRowsDeselected: this.onRowsDeselected,
+                        //     selectBy: {
+                        //         indexes: this.state.selectedIndexes
+                        //     }
+                        // }}
+                        />
+                    </div> : null
+                }
             </div>);
     }
 }

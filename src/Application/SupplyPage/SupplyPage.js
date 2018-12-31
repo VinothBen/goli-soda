@@ -48,8 +48,8 @@ class SupplyPage extends React.Component {
         if (_.isEmpty(this.props.userDetails) && !this.props.token) {
             hashHistory.push("/login");
         } else {
-            const url = "http://localhost:3010/api/getSupplyData?date=" + this.props.userDetails.lastSavedDateForSupply.toString();
-            // let url = "https://goli-soda-services.herokuapp.com/api/getSupplyData?date=" + this.props.userDetails.lastSavedDateForInhouse.toString();
+            // const url = "http://localhost:3010/api/getSupplyData?date=" + this.props.userDetails.lastSavedDateForSupply.toString();
+            let url = "https://goli-soda-services.herokuapp.com/api/getSupplyData?date=" + this.props.userDetails.lastSavedDateForSupply.toString();
             this.columnsConfig = [
                 {
                     key: 'id',
@@ -177,8 +177,8 @@ class SupplyPage extends React.Component {
     onClickSave = () => {
         if (!_.isEmpty(this.props.userDetails) && this.props.username) {
             let newObjects = [];
-            let SaveURL = "http://localhost:3010/api/supply-saveData";
-            // let SaveURL = "https://goli-soda-services.herokuapp.com/api/supply-saveData";
+            // let SaveURL = "http://localhost:3010/api/supply-saveData";
+            let SaveURL = "https://goli-soda-services.herokuapp.com/api/supply-saveData";
             let rowData = _.cloneDeep(this.state.rowData);
             if (!_.isEmpty(rowData) && !_.isEmpty(this.props.updatedGridData) && !_.isEqual(rowData, this.props.updatedGridData)) {
                 newObjects = _.differenceWith(rowData, this.props.updatedGridData, (obj1, obj2) => { return obj1.id === obj2.id });
@@ -287,8 +287,8 @@ class SupplyPage extends React.Component {
 
     onClickRefresh = () => {
         if (!_.isEmpty(this.props.userDetails) && !_.isEmpty(this.props.token)) {
-            const URL = "http://localhost:3010/api/getSupplyData?date=" + this.props.userDetails.lastSavedDateForSupply.toString();
-            // let URL = "https://goli-soda-services.herokuapp.com/api/getSupplyData?date="+ this.props.userDetails.lastSavedDateForInhouse.toString();
+            // const URL = "http://localhost:3010/api/getSupplyData?date=" + this.props.userDetails.lastSavedDateForSupply.toString();
+            let URL = "https://goli-soda-services.herokuapp.com/api/getSupplyData?date="+ this.props.userDetails.lastSavedDateForSupply.toString();
             this.setState({ rowData: [], redoStack: [], undoStack: [] });
             this.props.supplyActions.updateSupplyPageGridData([]);
             this.props.supplyActions.getSupplyPageDetails(URL, this.props.token.toString());
@@ -330,6 +330,7 @@ class SupplyPage extends React.Component {
                         rowGetter={this.rowGetter}
                         rowsCount={this.state.rowData ? this.state.rowData.length : 0}
                         minHeight={350}
+                        minWidth={1450}
                         onGridRowsUpdated={this.handleGridRowsUpdated}
                         onRowClick={this.onRowClick}
                         rowSelection={{
