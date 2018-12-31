@@ -474,43 +474,46 @@ class DownloadPage extends React.Component {
     handleDatePicker = () => {
         this.setState({ showDatePicker: !this.state.showDatePicker });
     }
-    onClickSearch = () => {
-        if (this.state.isDateSelected && this.state.selectedDate && this.state.downloadOptionValue) {
-            if (this.state.selectedDate && this.state.dateSelection === "single") {
-                this.setState({ showDateWarning: false, showSpinner: true });
-                let url = null;
-                if (this.state.downloadOptionValue === 1) {
-                    // url = "http://localhost:3010/api/download-search?date=" + this.state.selectedDate;
-                    url = "https://goli-soda-services.herokuapp.com/api/download-search?date=" + this.state.selectedDate;
-                } else if (this.state.downloadOptionValue === 2) {
-                    // url = "http://localhost:3010/api/download-search-supply?date=" + this.state.selectedDate;
-                    url = "https://goli-soda-services.herokuapp.com/api/download-search-supply?date=" + this.state.selectedDate;
-                } else if (this.state.downloadOptionValue === 3) {
-                    // url = "http://localhost:3010/api/download-search-br?date=" + this.state.selectedDate;
-                    url = "https://goli-soda-services.herokuapp.com/api/download-search-br?date=" + this.state.selectedDate;
-                }
-                if (!_.isEmpty(this.props.userDetails) && this.props.token && url) {
-                    this.props.inHousePageActions.getSearchDetailsByDate(url, this.props.token);
-                }
-            } else if (this.state.endDate && this.state.startDate && this.state.dateSelection === "range") {
-                this.setState({ showDateWarning: false, showSpinner: true });
-                let url = null;
-                if (this.state.downloadOptionValue === 1) {
-                    // url = "http://localhost:3010/api/download-search-MDates?start=" + this.state.startDate + "&end=" + this.state.endDate;
-                    url = "https://goli-soda-services.herokuapp.com/api/download-search-MDates?start=" + this.state.startDate+"&end=" + this.state.endDate;
-                } else if (this.state.downloadOptionValue === 2) {
-                    // url = "http://localhost:3010/api/download-search-supply-MDates?start=" + this.state.startDate + "&end=" + this.state.endDate;
-                    url = "https://goli-soda-services.herokuapp.com/api/download-search-supply-MDates?start=" + this.state.startDate+"&end=" + this.state.endDate;
-                } else if (this.state.downloadOptionValue === 3) {
-                    // url = "http://localhost:3010/api/download-search-br-MDates?start=" + this.state.startDate + "&end=" + this.state.endDate;
-                    url = "https://goli-soda-services.herokuapp.com/api/download-search-br-MDates?start=" + this.state.startDate+"&end=" + this.state.endDate;
-                }
-                if (!_.isEmpty(this.props.userDetails) && this.props.token && url) {
-                    this.props.inHousePageActions.getSearchDetailsByDate(url, this.props.token);
-                }
+    makeSearchCall = (e) => {
+        let selectedRadioOption = e || this.state.downloadOptionValue;
+        if (this.state.selectedDate && this.state.dateSelection === "single") {
+            this.setState({ showDateWarning: false, showSpinner: true });
+            let url = null;
+            if (selectedRadioOption === 1) {
+                // url = "http://localhost:3010/api/download-search?date=" + this.state.selectedDate;
+                url = "https://goli-soda-services.herokuapp.com/api/download-search?date=" + this.state.selectedDate;
+            } else if (selectedRadioOption === 2) {
+                // url = "http://localhost:3010/api/download-search-supply?date=" + this.state.selectedDate;
+                url = "https://goli-soda-services.herokuapp.com/api/download-search-supply?date=" + this.state.selectedDate;
+            } else if (selectedRadioOption === 3) {
+                // url = "http://localhost:3010/api/download-search-br?date=" + this.state.selectedDate;
+                url = "https://goli-soda-services.herokuapp.com/api/download-search-br?date=" + this.state.selectedDate;
+            }
+            if (!_.isEmpty(this.props.userDetails) && this.props.token && url) {
+                this.props.inHousePageActions.getSearchDetailsByDate(url, this.props.token);
+            }
+        } else if (this.state.endDate && this.state.startDate && this.state.dateSelection === "range") {
+            this.setState({ showDateWarning: false, showSpinner: true });
+            let url = null;
+            if (selectedRadioOption === 1) {
+                // url = "http://localhost:3010/api/download-search-MDates?start=" + this.state.startDate + "&end=" + this.state.endDate;
+                url = "https://goli-soda-services.herokuapp.com/api/download-search-MDates?start=" + this.state.startDate + "&end=" + this.state.endDate;
+            } else if (selectedRadioOption === 2) {
+                // url = "http://localhost:3010/api/download-search-supply-MDates?start=" + this.state.startDate + "&end=" + this.state.endDate;
+                url = "https://goli-soda-services.herokuapp.com/api/download-search-supply-MDates?start=" + this.state.startDate + "&end=" + this.state.endDate;
+            } else if (selectedRadioOption === 3) {
+                // url = "http://localhost:3010/api/download-search-br-MDates?start=" + this.state.startDate + "&end=" + this.state.endDate;
+                url = "https://goli-soda-services.herokuapp.com/api/download-search-br-MDates?start=" + this.state.startDate + "&end=" + this.state.endDate;
+            }
+            if (!_.isEmpty(this.props.userDetails) && this.props.token && url) {
+                this.props.inHousePageActions.getSearchDetailsByDate(url, this.props.token);
             }
         }
-        else {
+    }
+    onClickSearch = () => {
+        if (this.state.isDateSelected && this.state.selectedDate && this.state.downloadOptionValue) {
+            this.makeSearchCall();
+        } else {
             this.setState({ showDateWarning: true });
         }
     }
@@ -555,7 +558,20 @@ class DownloadPage extends React.Component {
         }
     }
     onChangeDataOptions = (e) => {
-        this.setState({ downloadOptionValue: e, rowData: this.rowData, rowDataDetails2: this.rowDataDetails2 });
+        if (this.state.isDateSelected && this.state.selectedDate && e) {
+            this.props.inHousePageActions.onErrorSearchDetails({});
+            this.setState({
+                downloadOptionValue: e, rowData: this.rowData,
+                rowDataDetails2: this.rowDataDetails2, showDateWarning: false
+            });
+            this.makeSearchCall(e);
+        } else {
+            this.setState({
+                downloadOptionValue: e, rowData: this.rowData,
+                rowDataDetails2: this.rowDataDetails2, showDateWarning: false
+            });
+        }
+
     }
     render() {
         let pieStyle = {
