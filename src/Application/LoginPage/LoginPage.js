@@ -52,8 +52,8 @@ class LoginPage extends React.Component {
         if (newFormData && newFormData.user.password) {
             this.setState({ showSpinner: true });
             newFormData.user.password = CryptoJS.AES.encrypt(newFormData.user.password, 'secret key vinothben').toString();
-            this.props.landingPageActions.loginPostCall("http://localhost:3010/api/user/login", newFormData);
-            // this.props.landingPageActions.loginPostCall("https://goli-soda-services.herokuapp.com/api/user/login", newFormData);
+            // this.props.landingPageActions.loginPostCall("http://localhost:3010/api/user/login", newFormData);
+            this.props.landingPageActions.loginPostCall("https://goli-soda-services.herokuapp.com/api/user/login", newFormData);
         }
     }
 
