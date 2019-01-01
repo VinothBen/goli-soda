@@ -146,7 +146,7 @@ class InHousePage extends React.Component {
 
             if (!_.isEmpty(this.props.initialGridData) && !_.isEmpty(this.props.columnConfig) && _.isEmpty(this.props.updatedGridData)) {
                 let sortedGridData = _.sortBy(this.props.initialGridData, 'id');
-                if (sortedGridData.length > 5) {
+                if (sortedGridData.length) {
                     // let newGridData = sortedGridData.slice(Math.max(sortedGridData.length - 5, 1));
                     let newGridData = _.cloneDeep(sortedGridData);
                     newGridData.map((obj, index) => {
@@ -187,7 +187,7 @@ class InHousePage extends React.Component {
             // }
             if (!_.isEmpty(nextProps.initialGridData) && !_.isEmpty(nextProps.columnConfig) && _.isEmpty(nextProps.updatedGridData)) {
                 let sortedGridData = _.sortBy(nextProps.initialGridData, 'id');
-                if (sortedGridData.length > 5) {
+                if (sortedGridData.length) {
                     // let newGridData = sortedGridData.slice(Math.max(sortedGridData.length - 5, 1));
                     let newGridData = _.cloneDeep(sortedGridData);
                     newGridData.map((obj, index) => {
@@ -205,7 +205,7 @@ class InHousePage extends React.Component {
             }
             if (!_.isEmpty(nextProps.columnConfig) && !_.isEmpty(nextProps.updatedGridData) && !_.isEqual(this.props.updatedGridData, nextProps.updatedGridData)) {
                 let sortedGridData = _.sortBy(nextProps.updatedGridData, 'id');
-                // if (sortedGridData.length > 5) {
+                // if (sortedGridData.length) {
                 //     let newGridData = sortedGridData.slice(Math.max(sortedGridData.length - 5, 1));
                 //     newGridData.map((obj, index) => {
                 //         obj.s_no = index + 1;
@@ -268,7 +268,7 @@ class InHousePage extends React.Component {
             // let SaveURL = "http://localhost:3010/api/inhouse-savedata";
             let SaveURL = "https://goli-soda-services.herokuapp.com/api/inhouse-savedata";
             let rowData = _.cloneDeep(this.state.rowData);
-            if (!_.isEmpty(rowData) && rowData.length > 5 && !_.isEqual(rowData, this.props.updatedGridData)) {
+            if (!_.isEmpty(rowData) && rowData.length && !_.isEqual(rowData, this.props.updatedGridData)) {
                 newObjects = _.differenceWith(rowData, this.props.updatedGridData, (obj1, obj2) => { return obj1.s_no === obj2.s_no });
                 if (!_.isEmpty(newObjects)) {
                     let isDateEmpty = false;

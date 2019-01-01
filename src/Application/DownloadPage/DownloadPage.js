@@ -269,13 +269,13 @@ class DownloadPage extends React.Component {
             {
                 key: "date",
                 name: "DATE",
-                width: 200,
+                width: 179,
                 editable: false
             },
             {
                 "key": "day",
                 "name": "DAY",
-                "width": 200,
+                "width": 179,
                 "editable": false
             },
             {
@@ -586,7 +586,7 @@ class DownloadPage extends React.Component {
         switch (this.state.downloadOptionValue) {
             case 1:
                 workBookName = "Manufacturing Cost Details";
-                gridWidth = 170;
+                gridWidth = 190;
                 break;
             case 2:
                 workBookName = "Supply Data";
@@ -789,7 +789,8 @@ class DownloadPage extends React.Component {
                             columns={!_.isEmpty(this.state.columnConfigDetailsForInHouse2) ? this.state.columnConfigDetailsForInHouse2 : []}
                             rowGetter={this.rowGetterForDetails2}
                             rowsCount={this.state.rowDataDetails2 ? this.state.rowDataDetails2.length : 0}
-                            minHeight={170}
+                            minHeight={190}
+                            minWidth={1259}
                             onGridRowsUpdated={this.handleGridRowsUpdated}
                         // onRowClick={this.onRowClick}
                         // rowSelection={{

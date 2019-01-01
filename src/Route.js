@@ -21,7 +21,7 @@ export const routeComponents = (
             <Route path="/supply" component={SupplyPage}/>
             <Route path="/bottle-return" component={BottleReturnsPage}/>
             <Route path="/download" component={DownloadPage}/>
-            <Route path="/contact-us" component={()=>(<div>Contact Us Page Found!</div>)}/>
+            <Route path="/about" component={()=>(<div>About Page Not Ready Yet!</div>)}/>
             <Route path="*" component={()=>(<div>No Match Found!</div>)} />
         </ Route>
         <Route path="*" component={()=>(<div>No Match Found!</div>)} />

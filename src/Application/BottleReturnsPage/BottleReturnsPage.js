@@ -173,7 +173,7 @@ class BottleReturnsPage extends React.Component {
     };
 
     onClickSave = () => {
-        if (!_.isEmpty(this.props.userDetails) && this.props.username) {
+        if (!_.isEmpty(this.props.userDetails) && this.props.token) {
             let newObjects = [];
             // let SaveURL = "http://localhost:3010/api/bottleReturns-saveData";
             let SaveURL = "https://goli-soda-services.herokuapp.com/api/bottleReturns-saveData";
