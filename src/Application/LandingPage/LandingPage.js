@@ -77,6 +77,7 @@ class LandingPage extends React.Component {
                     container={this}
                     aria-labelledby="contained-modal-title"
                     animation={false}
+                    className="logOut-model"
                 >
                     <Modal.Header closeButton>
                         <Modal.Title id="contained-modal-title">

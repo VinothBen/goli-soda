@@ -68,23 +68,49 @@
     .modal-backdrop{
         opacity: 0.5;
     }
-    .modal-dialog {
-        top: 20%;
-        .modal-content {
-            .modal-header {
-                .modal-title {
-                    float: left;
-                    position: absolute;
+    .logOut-model {
+        .modal-dialog {
+            transform:scaleY(.01) scaleX(0);
+            animation:zoomIn 1s cubic-bezier(0.165, 0.840, 0.440, 1.000) forwards;
+            top: 20%;
+            .modal-content {
+                .modal-header {
+                    .modal-title {
+                        float: left;
+                        position: absolute;
+                    }
                 }
-            }
-            .modal-footer {
-                .btn-default:hover {
-                    background-color: #425794;
-                    color: #fff;
+                .modal-footer {
+                    .btn-default:hover {
+                        background-color: #425794;
+                        color: #fff;
+                    }
                 }
             }
         }
     }
+    
+
+    @keyframes unfoldIn {
+        0% {
+          transform:scaleY(.005) scaleX(0);
+        }
+        50% {
+          transform:scaleY(.005) scaleX(1);
+        }
+        100% {
+          transform:scaleY(1) scaleX(1);
+        }
+      }
+      
+      @keyframes zoomIn {
+        0% {
+          transform:scale(0);
+        }
+        100% {
+          transform:scale(1);
+        }
+      }
 }
 // .react-datepicker {
 //     font-size: 1em !important;

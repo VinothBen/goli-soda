@@ -13,7 +13,7 @@ export default connect(
                 popUpMessage: state.inHousePageReducer.popUpMessage,
                 token: state.landingPageReducer.token,
                 userDetails: state.landingPageReducer.userDetails,
-                searchErrorMessage: state.landingPageReducer.searchErrorMessage,
+                searchErrorMessage: state.inHousePageReducer.searchErrorMessage,
               };
 },
     (dispatch)=>{

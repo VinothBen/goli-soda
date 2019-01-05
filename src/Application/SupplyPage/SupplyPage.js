@@ -22,7 +22,8 @@ class SupplyPage extends React.Component {
             rowId: null,
             undoStack: [],
             redoStack: [],
-            showMessage: ""
+            showMessage: "",
+            selectedRows: []
         }
         this.bottleType = [
             { id: 0, title: 'crown cap 200ml' },
@@ -52,11 +53,6 @@ class SupplyPage extends React.Component {
             let url = "https://goli-soda-services.herokuapp.com/api/getSupplyData?date=" + this.props.userDetails.lastSavedDateForSupply.toString();
             this.columnsConfig = [
                 {
-                    key: 'id',
-                    name: 'S.NO',
-                    width: 50
-                },
-                {
                     key: 'date',
                     name: 'DATE',
                     editable: true,
@@ -65,7 +61,7 @@ class SupplyPage extends React.Component {
                 {
                     key: 'day',
                     name: 'DAY',
-                    editor: this.DaysDropDownValue,
+                    editable: false,
                     format: "string"
                 },
                 {
@@ -141,35 +137,41 @@ class SupplyPage extends React.Component {
     };
 
     handleGridRowsUpdated = ({ fromRow, toRow, updated }) => {
-        let isValidData = false;
+        let isValidData = null;
         // ****** Add validation for all Data *****//
         if (!_.isEmpty(updated) && !_.isEmpty(updated[Object.keys(updated)[0]])) {
             try {
                 if (!_.isEmpty(updated) && Object.keys(updated).length != 0) {
                     let columnObject = _.find(this.state.columnsConfig, { "key": Object.keys(updated)[0].toString() });
                     if (!_.isEmpty(columnObject) && columnObject.format === "number") {
-                        isValidData = !(Number.isNaN(Number.parseInt(updated[columnObject.key])));
+                        isValidData = !(Number.isNaN(Number.parseInt(updated[columnObject.key]))) ? null : "Number";
                     }
                     if (!_.isEmpty(updated) && columnObject.format === "date") {
-                        isValidData = moment(updated[columnObject.key], "MM-DD-YY", true).isValid();
+                        isValidData = moment(updated[columnObject.key], "MM-DD-YY", true).isValid() ? null : "Date";
                     }
                     if (!_.isEmpty(updated) && columnObject.format === "string") {
-                        isValidData = true;
+                        isValidData = null;
                     }
                 }
             } catch (err) {
                 NotificationManager.info(err.message, 'Message', 4000);
             }
-            if (!_.isEmpty(this.state.rowData) && isValidData) {
+            if (!_.isEmpty(this.state.rowData) && isValidData === null) {
                 let rowData = this.state.rowData.slice();
                 for (let i = fromRow; i <= toRow; i++) {
                     let rowToUpdate = rowData[i];
                     let updatedRow = update(rowToUpdate, { $merge: updated });
+                    if (updated.date) {
+                        let updateDay = {
+                            day: moment(updated.date).format("dddd")
+                        };
+                        updatedRow = update(updatedRow, { $merge: updateDay });
+                    }
                     rowData[i] = updatedRow;
                 }
                 this.setState({ rowData });
             } else {
-                NotificationManager.error('Invalid Date/Data Format.', 'Message', 4000);
+                NotificationManager.error(`Invalid ${isValidData} Format.`, 'Message', 4000);
             }
         }
     };
@@ -180,24 +182,37 @@ class SupplyPage extends React.Component {
             // let SaveURL = "http://localhost:3010/api/supply-saveData";
             let SaveURL = "https://goli-soda-services.herokuapp.com/api/supply-saveData";
             let rowData = _.cloneDeep(this.state.rowData);
-            if (!_.isEmpty(rowData) && !_.isEmpty(this.props.updatedGridData) && !_.isEqual(rowData, this.props.updatedGridData)) {
+            if (!_.isEmpty(rowData) && this.props.updatedGridData.length !== 0) {
                 newObjects = _.differenceWith(rowData, this.props.updatedGridData, (obj1, obj2) => { return obj1.id === obj2.id });
                 if (!_.isEmpty(newObjects)) {
-                    let isDateEmpty = false;
+                    let emptyCheckFlag = false;
+                    let newObjectKeys = Object.keys(newObjects[0]);
+                    newObjects.map((obj) => {
+                        delete obj._id;
+                    });
                     for (let i = 0; i < newObjects.length; i++) {
-                        if (newObjects[i].date === "") {
-                            isDateEmpty = (newObjects[i].date === "");
-                            break;
+                        for (let j = 0; j < newObjectKeys.length; j++) {
+                            let value = newObjects[i];
+                            let validColumn = _.find(this.state.columnsConfig, (obj) => obj.key === newObjectKeys[j]);
+                            if (value[newObjectKeys[j]] === "" && !_.isEmpty(validColumn)) {
+                                emptyCheckFlag = true;
+                                break;
+                            }
                         }
+                        //Object.keys(newObjects[i]) === columnsConfig[i].datakey
+                        //To-Do : to check only necessary fields should not be empty.
                     }
-                    if (!isDateEmpty) {
+                    if (!emptyCheckFlag) {
                         this.props.supplyActions.saveSupplyData(SaveURL,
                             { supplyData: newObjects, username: this.props.userDetails.username.toString() }, this.props.token, this.state.rowData);
                         // NotificationManager.success('Data Saved Successfully.', 'Message', 3000);
                         // this.props.supplyActions.updateSupplyPageGridData(this.state.rowData);
+                        this.setState({ redoStack: [], undoStack: [], selectedIndexes: [], selectedRows: [] });
                     } else {
-                        NotificationManager.error('Date fields should not be empty.', 'Message', 4000);
+                        NotificationManager.error('Editable fields should not be empty.', 'Message', 4000);
                     }
+                } else {
+                    NotificationManager.success('Data is upto date.', 'Message', 4000);
                 }
             }
         }
@@ -206,64 +221,97 @@ class SupplyPage extends React.Component {
         let rowData = _.cloneDeep(this.state.rowData);
         let undoStack = this.state.undoStack ? _.cloneDeep(this.state.undoStack) : [];
         undoStack.push(_.cloneDeep(rowData));
-        let maxId = _.maxBy(rowData, (obj) => { return obj.id });
-        let maxSerialNo = rowData.length;
-        let objectKeyName = Object.keys(rowData[0]);
-        let value = {};
-        objectKeyName.map((obj) => {
-            if (obj === "id") {
-                value[obj] = maxId.id + 1;
-            } else {
-                value[obj] = "";
+        if (rowData.length === 0) {
+            rowData = [{
+                "id": "0",
+                "date": "",
+                "day": "",
+                "bottle_type": "",
+                "total_bottles": "",
+                "type_of_supply": "",
+                "area": "",
+                "type_of_vehicle": "",
+                "fuel_cost": "",
+                "employee_wage": ""
+            }];
+            let maxId = _.maxBy(this.props.updatedGridData, (obj) => { return Number(obj.id) });
+            try {
+                rowData[0].id = (Number(maxId.id) + 1).toString();
+            } catch (error) {
+                //eslint-disable-next-line
+                console.log("...error", error);
             }
-        });
-        value.id = (maxSerialNo + 1).toString();
-        rowData.push(value);
+        } else {
+            let maxId = _.maxBy(rowData, (obj) => { return obj.id });
+            let maxSerialNo = rowData.length;
+            let objectKeyName = Object.keys(rowData[0]);
+            let value = {};
+            objectKeyName.map((obj) => {
+                if (obj === "id") {
+                    value[obj] = maxId.id + 1;
+                } else {
+                    value[obj] = "";
+                }
+            });
+            value.id = (maxSerialNo + 1).toString();
+            rowData.push(value);
+        }
         this.setState({ rowData, undoStack, redoStack: [] });
     }
-    onClearRow = () => {
-        this.setState({ showClearRowInput: !this.state.showClearRowInput, showDeleteRowInput: false });
-    }
+    // onClearRow = () => {
+    //     this.setState({ showClearRowInput: !this.state.showClearRowInput, showDeleteRowInput: false });
+    // }
 
     onDeleteRow = () => {
-        this.setState({ showDeleteRowInput: !this.state.showDeleteRowInput, showClearRowInput: false });
-    }
-    onChangeInput = (e) => {
-        if ((e.which == 13 || e.keyCode == 13) && e.target.value) {
-            let rowData = _.cloneDeep(this.state.rowData);
+        // this.setState({ showDeleteRowInput: !this.state.showDeleteRowInput, showClearRowInput: false });
+        if (!_.isEmpty(this.state.rowData) && this.state.selectedRows.length !== 0) {
             let undoStack = this.state.undoStack ? _.cloneDeep(this.state.undoStack) : [];
-            let newRowData = [];
-            undoStack.push(_.cloneDeep(rowData));
-            if (this.state.showClearRowInput && this.state.rowId) {
-                rowData.map((obj) => {
-                    if (Number(obj.id) === this.state.rowId) {
-                        let objectKeyName = Object.keys(obj);
-                        objectKeyName.map((keyString) => {
-                            if (keyString === "id") {
-                                obj[keyString] = this.state.rowId;
-                            } else {
-                                obj[keyString] = "";
-                            }
-                        });
-                    }
-                    newRowData.push(obj);
-                });
-                this.setState({ rowData: newRowData, undoStack, redoStack: [] });
-            } else if (this.state.showDeleteRowInput && this.state.rowId) {
-                newRowData = rowData.filter((item) => Number(item.id) !== this.state.rowId);
-                newRowData.map((obj) => {
-                    if (Number(obj.id) > this.state.rowId) {
-                        obj.id = (Number(obj.id) - 1).toString();
-                    }
-                });
-                this.setState({ rowData: newRowData, undoStack, redoStack: [] });
-            }
-            this.setState({ showDeleteRowInput: false, showClearRowInput: false });
-        } else if (e.which == 27 || e.keyCode == 27) {
-            this.setState({ showDeleteRowInput: false, showClearRowInput: false });
+            undoStack.push(_.cloneDeep(this.state.rowData));
+            this.setState({
+                rowData:
+                    _.differenceWith(this.state.rowData, this.state.selectedRows, (obj1, obj2) => obj1.id === obj2),
+                undoStack, redoStack: [], selectedRows: [], selectedIndexes: []
+            });
+        } else {
+            NotificationManager.info("Please Select Rows To Delete.", 'Message', 4000);
         }
-        this.setState({ rowId: parseInt(e.target.value) });
     }
+    // onChangeInput = (e) => {
+    //     if ((e.which == 13 || e.keyCode == 13) && e.target.value) {
+    //         let rowData = _.cloneDeep(this.state.rowData);
+    //         let undoStack = this.state.undoStack ? _.cloneDeep(this.state.undoStack) : [];
+    //         let newRowData = [];
+    //         undoStack.push(_.cloneDeep(rowData));
+    //         if (this.state.showClearRowInput && this.state.rowId) {
+    //             rowData.map((obj) => {
+    //                 if (Number(obj.id) === this.state.rowId) {
+    //                     let objectKeyName = Object.keys(obj);
+    //                     objectKeyName.map((keyString) => {
+    //                         if (keyString === "id") {
+    //                             obj[keyString] = this.state.rowId;
+    //                         } else {
+    //                             obj[keyString] = "";
+    //                         }
+    //                     });
+    //                 }
+    //                 newRowData.push(obj);
+    //             });
+    //             this.setState({ rowData: newRowData, undoStack, redoStack: [] });
+    //         } else if (this.state.showDeleteRowInput && this.state.rowId) {
+    //             newRowData = rowData.filter((item) => Number(item.id) !== this.state.rowId);
+    //             newRowData.map((obj) => {
+    //                 if (Number(obj.id) > this.state.rowId) {
+    //                     obj.id = (Number(obj.id) - 1).toString();
+    //                 }
+    //             });
+    //             this.setState({ rowData: newRowData, undoStack, redoStack: [] });
+    //         }
+    //         this.setState({ showDeleteRowInput: false, showClearRowInput: false });
+    //     } else if (e.which == 27 || e.keyCode == 27) {
+    //         this.setState({ showDeleteRowInput: false, showClearRowInput: false });
+    //     }
+    //     this.setState({ rowId: parseInt(e.target.value) });
+    // }
     onUndoClick = () => {
         if (!_.isEmpty(this.state.undoStack)) {
             let undoStack = _.cloneDeep(this.state.undoStack);
@@ -288,12 +336,36 @@ class SupplyPage extends React.Component {
     onClickRefresh = () => {
         if (!_.isEmpty(this.props.userDetails) && !_.isEmpty(this.props.token)) {
             // const URL = "http://localhost:3010/api/getSupplyData?date=" + this.props.userDetails.lastSavedDateForSupply.toString();
-            let URL = "https://goli-soda-services.herokuapp.com/api/getSupplyData?date="+ this.props.userDetails.lastSavedDateForSupply.toString();
-            this.setState({ rowData: [], redoStack: [], undoStack: [] });
+            let URL = "https://goli-soda-services.herokuapp.com/api/getSupplyData?date=" + this.props.userDetails.lastSavedDateForSupply.toString();
+            this.setState({ rowData: [], redoStack: [], undoStack: [], selectedIndexes: [], selectedRows: []});
             this.props.supplyActions.updateSupplyPageGridData([]);
             this.props.supplyActions.getSupplyPageDetails(URL, this.props.token.toString());
         }
     }
+    onRowsSelected = rows => {
+        this.setState({
+            selectedIndexes: this.state.selectedIndexes.concat(
+                rows.map(r => r.rowIdx)
+            ),
+            selectedRows: this.state.selectedRows.concat(
+                rows.map(r => r.row.id)
+            )
+        });
+    };
+
+    onRowsDeselected = rows => {
+        let rowIndexes = rows.map(r => r.rowIdx);
+        let rowsSelected = rows.map(r => r.row.id);
+        this.setState({
+            selectedIndexes: this.state.selectedIndexes.filter(
+                i => rowIndexes.indexOf(i) === -1
+            ),
+            selectedRows: this.state.selectedRows.filter(
+                i => rowsSelected.indexOf(i) === -1
+            ),
+        });
+    };
+
     render() {
         //To show notifications for succes/error/warning
         if (!_.isEmpty(this.props.searchErrorMessage)) {
@@ -334,7 +406,7 @@ class SupplyPage extends React.Component {
                         onGridRowsUpdated={this.handleGridRowsUpdated}
                         onRowClick={this.onRowClick}
                         rowSelection={{
-                            showCheckbox: false,
+                            showCheckbox: true,
                             enableShiftSelect: true,
                             onRowsSelected: this.onRowsSelected,
                             onRowsDeselected: this.onRowsDeselected,
@@ -346,7 +418,7 @@ class SupplyPage extends React.Component {
                         <i className="fas fa-save"></i>Save Data</button>
                     <button className="btn btn-sm btn-primary buttons" onClick={this.onCreateRow}>
                         <i className="fas fa-plus-circle"></i>Create Row</button>
-                    <button className="btn btn-sm btn-primary buttons" onClick={this.onClearRow}>
+                    {/* <button className="btn btn-sm btn-primary buttons" onClick={this.onClearRow}>
                         <i className="fas fa-minus-circle"></i>Clear Row</button>
                     {this.state.showClearRowInput ?
                         <input
@@ -355,17 +427,17 @@ class SupplyPage extends React.Component {
                             defaultValue=""
                             onKeyUp={this.onChangeInput}
                         />
-                        : null}
+                        : null} */}
                     <button className="btn btn-sm btn-primary buttons" onClick={this.onDeleteRow}>
                         <i className="fas fa-trash-alt"></i>Delete Row</button>
-                    {this.state.showDeleteRowInput ?
+                    {/* {this.state.showDeleteRowInput ?
                         <input
                             type="number"
                             placeholder="Enter Row No"
                             defaultValue=""
                             onKeyUp={this.onChangeInput}
                         /> :
-                        null}
+                        null} */}
                     <button className="btn btn-sm btn-primary buttons" data-toggle="tooltip" data-animation="true"
                         data-placement="top" title="Undo" onClick={this.onUndoClick} disabled={_.isEmpty(this.state.undoStack) ? true : false}>
                         <i className="fas fa-undo"></i>Undo</button>

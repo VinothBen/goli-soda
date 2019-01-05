@@ -9,6 +9,8 @@ import { hashHistory } from "react-router";
 import { NotificationContainer, NotificationManager } from 'react-notifications';
 import 'react-notifications/lib/notifications.css';
 import moment from "moment";
+// import DateRangePicker from 'react-daterange-picker';
+// import 'react-daterange-picker/dist/css/react-calendar.css';
 
 const { AutoComplete: AutoCompleteEditor } = Editors;
 // const days = [
@@ -34,6 +36,7 @@ class InHousePage extends React.Component {
         super(props);
         this.state = {
             selectedIndexes: [],
+            selectedRows: [],
             rowData: [],
             columnsConfig: [],
             showSpinner: false,
@@ -61,6 +64,24 @@ class InHousePage extends React.Component {
         ];
         this.BottleType = <AutoCompleteEditor options={this.bottleType} />;
         this.DaysDropDownValue = <AutoCompleteEditor options={this.days} />;
+        // this.showDatePicker = false;
+        // this.dates = null;
+        // this.datePicker = (date) => {
+        //     return (<div onDoubleClick={(event) => {
+        //         event.preventDefault();
+        //         this.onClickDateField(event);
+        //     }}>
+        //         <span>{date.value}</span>
+        //         {this.showDatePicker ? <div className="date-picker">
+        //             <DateRangePicker
+        //                 onSelect={this.handleDateSelect}
+        //                 value={moment(date.value)}
+        //                 selectionType="single"
+        //                 local="en"
+        //             />  
+        //         </div> : null}
+        //     </div>);
+        // };
     }
 
     componentWillMount() {
@@ -74,11 +95,6 @@ class InHousePage extends React.Component {
         } else {
             let columnsConfig = [
                 {
-                    key: 's_no',
-                    name: 'S.NO',
-                    width: 50
-                },
-                {
                     key: 'date',
                     name: 'DATE',
                     editable: true,
@@ -87,7 +103,7 @@ class InHousePage extends React.Component {
                 {
                     key: 'day',
                     name: 'DAY',
-                    editor: this.DaysDropDownValue,
+                    editable: false,
                     format: "string"
                 },
                 {
@@ -124,7 +140,7 @@ class InHousePage extends React.Component {
                 {
                     key: 'bottles_for_cost',
                     name: 'BOTTLES FOR COST',
-                    editable: true,
+                    editable: false,
                     format: "number"
                 }
             ];
@@ -135,8 +151,9 @@ class InHousePage extends React.Component {
             } else {
                 this.setState({ showSpinner: false });
             }
-            if (_.isEmpty(this.props.columnConfig)) {
+            if (_.isEmpty(this.props.columnConfig) || this.state.columnsConfig.length === 0) {
                 this.props.inHousePageActions.inHousePageColumnConfig(columnsConfig);
+                this.setState({ columnsConfig: columnsConfig });
             }
             if (_.isEmpty(this.props.initialGridData) && this.props.token) {
                 // let URL = "http://localhost:3010/api/inhouse-getdata?date="+ this.props.userDetails.lastSavedDateForInhouse.toString();
@@ -149,15 +166,15 @@ class InHousePage extends React.Component {
                 if (sortedGridData.length) {
                     // let newGridData = sortedGridData.slice(Math.max(sortedGridData.length - 5, 1));
                     let newGridData = _.cloneDeep(sortedGridData);
-                    newGridData.map((obj, index) => {
-                        obj.s_no = index + 1;
-                    });
+                    // newGridData.map((obj, index) => {
+                    //     obj.s_no = index + 1;
+                    // });
                     this.setState({ rowData: newGridData, columnsConfig: this.props.columnConfig });
                     this.props.inHousePageActions.updateInHousePageGridData(newGridData);
                 } else {
-                    sortedGridData.map((obj, index) => {
-                        obj.s_no = index + 1;
-                    });
+                    // sortedGridData.map((obj, index) => {
+                    //     obj.s_no = index + 1;
+                    // });
                     this.setState({ rowData: sortedGridData, columnsConfig: this.props.columnConfig });
                     this.props.inHousePageActions.updateInHousePageGridData(sortedGridData);
                 }
@@ -190,15 +207,15 @@ class InHousePage extends React.Component {
                 if (sortedGridData.length) {
                     // let newGridData = sortedGridData.slice(Math.max(sortedGridData.length - 5, 1));
                     let newGridData = _.cloneDeep(sortedGridData);
-                    newGridData.map((obj, index) => {
-                        obj.s_no = index + 1;
-                    });
+                    // newGridData.map((obj, index) => {
+                    //     obj.s_no = index + 1;
+                    // });
                     this.setState({ rowData: newGridData, columnsConfig: nextProps.columnConfig });
                     this.props.inHousePageActions.updateInHousePageGridData(newGridData);
                 } else {
-                    sortedGridData.map((obj, index) => {
-                        obj.s_no = index + 1;
-                    });
+                    // sortedGridData.map((obj, index) => {
+                    //     obj.s_no = index + 1;
+                    // });
                     this.setState({ rowData: sortedGridData, columnsConfig: nextProps.columnConfig });
                     this.props.inHousePageActions.updateInHousePageGridData(sortedGridData);
                 }
@@ -229,67 +246,98 @@ class InHousePage extends React.Component {
     };
 
     handleGridRowsUpdated = ({ fromRow, toRow, updated }) => {
-        let isValidData = false;
+        let isValidData = null;
         // ****** Add validation for all Data *****//
         if (!_.isEmpty(updated) && !_.isEmpty(updated[Object.keys(updated)[0]])) {
             try {
                 if (!_.isEmpty(updated) && Object.keys(updated).length != 0) {
                     let columnObject = _.find(this.state.columnsConfig, { "key": Object.keys(updated)[0].toString() });
                     if (!_.isEmpty(columnObject) && columnObject.format === "number") {
-                        isValidData = !(Number.isNaN(Number.parseInt(updated[columnObject.key])));
+                        isValidData = !(Number.isNaN(Number.parseInt(updated[columnObject.key])))?null : "Number";
                     }
                     if (!_.isEmpty(updated) && columnObject.format === "date") {
-                        isValidData = moment(updated[columnObject.key], "MM-DD-YY", true).isValid();
+                        isValidData = moment(updated[columnObject.key], "MM-DD-YY", true).isValid()? null : "Date";
                     }
                     if (!_.isEmpty(updated) && columnObject.format === "string") {
-                        isValidData = true;
+                        isValidData = null;
                     }
                 }
             } catch (err) {
                 NotificationManager.info(err.message, 'Message', 4000);
             }
-            if (!_.isEmpty(this.state.rowData) && isValidData) {
+            if (!_.isEmpty(this.state.rowData) && isValidData === null) {
                 let rowData = this.state.rowData.slice();
                 for (let i = fromRow; i <= toRow; i++) {
                     let rowToUpdate = rowData[i];
                     let updatedRow = update(rowToUpdate, { $merge: updated });
+                    if (updated.rate || updated.no_of_bottles) {
+                        let updateBottleForCost = {
+                            bottles_for_cost:
+                                ((isNaN(Number(updatedRow.rate)) ? 0 : Number(updatedRow.rate)) *
+                                    (isNaN(Number(updatedRow.no_of_bottles)) ? 0 : Number(updatedRow.no_of_bottles))).toString()
+                        };
+                        updatedRow = update(updatedRow, { $merge: updateBottleForCost });
+                    } else if (updated.date) {
+                        let updateDay = {
+                            day: moment(updated.date).format("dddd")
+                        };
+                        updatedRow = update(updatedRow, { $merge: updateDay });
+                    }
                     rowData[i] = updatedRow;
                 }
                 this.setState({ rowData });
             } else {
-                NotificationManager.error('Invalid Date/Data Format.', 'Message', 4000);
+                NotificationManager.error(`Invalid ${isValidData} Format.`, 'Message', 4000);
             }
         }
     };
-
+    // onClickDateField = (event) => {
+    //     console.log("...click", event.clientX, event.clientY);
+    //     this.showDatePicker = true;
+    //     this.forceUpdate();
+    // }
+    // handleDateSelect = (date)=>{
+    //     console.log("...date", date);
+    //     this.showDatePicker = false;
+    //     this.forceUpdate();
+    // }
     onClickSave = () => {
         if (!_.isEmpty(this.props.userDetails) && this.props.token) {
             let newObjects = [];
             // let SaveURL = "http://localhost:3010/api/inhouse-savedata";
             let SaveURL = "https://goli-soda-services.herokuapp.com/api/inhouse-savedata";
             let rowData = _.cloneDeep(this.state.rowData);
-            if (!_.isEmpty(rowData) && rowData.length && !_.isEqual(rowData, this.props.updatedGridData)) {
-                newObjects = _.differenceWith(rowData, this.props.updatedGridData, (obj1, obj2) => { return obj1.s_no === obj2.s_no });
+            if (!_.isEmpty(rowData) && rowData.length !== 0 && this.props.updatedGridData.length !== 0) {
+                newObjects = _.differenceWith(rowData, this.props.updatedGridData, (obj1, obj2) => { return obj1.id === obj2.id });
                 if (!_.isEmpty(newObjects)) {
-                    let isDateEmpty = false;
+                    let emptyCheckFlag = false;
+                    let newObjectKeys = Object.keys(newObjects[0]);
                     newObjects.map((obj) => {
-                        delete obj.s_no;
                         delete obj._id;
                     });
                     for (let i = 0; i < newObjects.length; i++) {
-                        if (newObjects[i].date === "") {
-                            isDateEmpty = (newObjects[i].date === "");
-                            break;
+                        for (let j = 0; j < newObjectKeys.length; j++) {
+                            let value = newObjects[i];
+                            let validColumn = _.find(this.state.columnsConfig, (obj) => obj.key === newObjectKeys[j]);
+                            if (value[newObjectKeys[j]] === "" && !_.isEmpty(validColumn)) {
+                                emptyCheckFlag = true;
+                                break;
+                            }
                         }
+                        //Object.keys(newObjects[i]) === columnsConfig[i].datakey
+                        //To-Do : to check only necessary fields should not be empty.
                     }
-                    if (!isDateEmpty) {
-                        this.props.inHousePageActions.saveInHouseData(SaveURL, 
+                    if (!emptyCheckFlag) {
+                        this.props.inHousePageActions.saveInHouseData(SaveURL,
                             { inhousedata: newObjects, username: this.props.userDetails.username }, this.props.token, this.state.rowData);
                         // NotificationManager.success('Data Saved Successfully.', 'Message', 3000);
                         // this.props.inHousePageActions.updateInHousePageGridData(this.state.rowData);
+                        this.setState({ redoStack: [], undoStack: [], selectedIndexes: [], selectedRows: [] });
                     } else {
-                        NotificationManager.error('Date fields should not be empty.', 'Message', 4000);
+                        NotificationManager.error('Editable fields should not be empty.', 'Message', 4000);
                     }
+                } else {
+                    NotificationManager.success('Data is upto date.', 'Message', 4000);
                 }
             }
         }
@@ -298,66 +346,99 @@ class InHousePage extends React.Component {
         let rowData = _.cloneDeep(this.state.rowData);
         let undoStack = this.state.undoStack ? _.cloneDeep(this.state.undoStack) : [];
         undoStack.push(_.cloneDeep(rowData));
-        let maxId = _.maxBy(rowData, (obj) => { return obj.id });
-        let maxSerialNo = rowData.length;
-        let objectKeyName = Object.keys(rowData[0]);
-        let value = {};
-        objectKeyName.map((obj) => {
-            if (obj === "id") {
-                value[obj] = maxId.id + 1;
-            } else {
-                value[obj] = "";
+        if (rowData.length === 0) {
+            rowData = [{
+                "id": 0,
+                "date": "",
+                "day": "",
+                "bottle_type": "",
+                "rate": "",
+                "no_of_bottles": "",
+                "employee_involved": "",
+                "employee_cost": "",
+                "bottles_for_cost": ""
+            }];
+            let maxId = _.maxBy(this.props.updatedGridData, (obj) => { return obj.id });
+            try {
+                rowData[0].id = maxId.id + 1;
+            } catch (error) {
+                //eslint-disable-next-line
+                console.log("...error", error);
             }
-        });
-        value.s_no = maxSerialNo + 1;
+        } else {
+            let maxId = _.maxBy(rowData, (obj) => { return obj.id });
+            // let maxSerialNo = rowData.length;
+            let objectKeyName = Object.keys(rowData[0]);
+            let value = {};
+            objectKeyName.map((obj) => {
+                if (obj === "id") {
+                    value[obj] = maxId.id + 1;
+                } else {
+                    value[obj] = "";
+                }
+            });
+            // value.s_no = maxSerialNo + 1;
+            rowData.push(value);
+        }
         // let newObject = { "id": maxId.id + 1, "date": "", "day": "", "bottleType": "", "rate": "", "bottleCount": "", "empCount": "", "empCost": "", "totalCost": "" };
-        rowData.push(value);
         this.setState({ rowData, undoStack, redoStack: [] });
     }
-    onClearRow = () => {
-        this.setState({ showClearRowInput: !this.state.showClearRowInput, showDeleteRowInput: false });
-    }
+    // onClearRow = () => {
+    //     this.setState({ showClearRowInput: !this.state.showClearRowInput, showDeleteRowInput: false });
+    // }
 
     onDeleteRow = () => {
-        this.setState({ showDeleteRowInput: !this.state.showDeleteRowInput, showClearRowInput: false });
-    }
-    onChangeInput = (e) => {
-        if ((e.which == 13 || e.keyCode == 13) && e.target.value) {
-            let rowData = _.cloneDeep(this.state.rowData);
+        //commented line for previuos changes
+        //this.setState({ showDeleteRowInput: !this.state.showDeleteRowInput, showClearRowInput: false });
+        if (!_.isEmpty(this.state.rowData) && this.state.selectedRows.length !== 0) {
             let undoStack = this.state.undoStack ? _.cloneDeep(this.state.undoStack) : [];
-            let newRowData = [];
-            undoStack.push(_.cloneDeep(rowData));
-            if (this.state.showClearRowInput && this.state.rowId) {
-                rowData.map((obj) => {
-                    if (obj.s_no === this.state.rowId) {
-                        let objectKeyName = Object.keys(obj);
-                        objectKeyName.map((keyString) => {
-                            if (keyString === "s_no") {
-                                obj[keyString] = this.state.rowId;
-                            } else {
-                                obj[keyString] = "";
-                            }
-                        });
-                        // obj = { "id": this.state.rowId, "date": "", "day": "", "bottleType": "", "rate": "", "bottleCount": "", "empCount": "", "empCost": "", "totalCost": "" };
-                    }
-                    newRowData.push(obj);
-                });
-                this.setState({ rowData: newRowData, undoStack, redoStack: [] });
-            } else if (this.state.showDeleteRowInput && this.state.rowId) {
-                newRowData = rowData.filter((item) => item.s_no !== this.state.rowId);
-                newRowData.map((obj) => {
-                    if (obj.s_no > this.state.rowId) {
-                        obj.s_no = obj.s_no - 1;
-                    }
-                });
-                this.setState({ rowData: newRowData, undoStack, redoStack: [] });
-            }
-            this.setState({ showDeleteRowInput: false, showClearRowInput: false });
-        } else if (e.which == 27 || e.keyCode == 27) {
-            this.setState({ showDeleteRowInput: false, showClearRowInput: false });
+            undoStack.push(_.cloneDeep(this.state.rowData));
+            this.setState({
+                rowData:
+                    _.differenceWith(this.state.rowData, this.state.selectedRows, (obj1, obj2) => obj1.id === obj2),
+                undoStack, redoStack: [], selectedRows: [], selectedIndexes: []
+            });
+        } else {
+            NotificationManager.info("Please Select Rows To Delete.", 'Message', 4000);
         }
-        this.setState({ rowId: parseInt(e.target.value) });
     }
+    // onChangeInput = (e) => {
+    //     if ((e.which == 13 || e.keyCode == 13) && e.target.value) {
+    //         let rowData = _.cloneDeep(this.state.rowData);
+    //         let undoStack = this.state.undoStack ? _.cloneDeep(this.state.undoStack) : [];
+    //         let newRowData = [];
+    //         undoStack.push(_.cloneDeep(rowData));
+    //         if (this.state.showClearRowInput && this.state.rowId) {
+    //             rowData.map((obj) => {
+    //                 if (obj.s_no === this.state.rowId) {
+    //                     let objectKeyName = Object.keys(obj);
+    //                     objectKeyName.map((keyString) => {
+    //                         if (keyString === "s_no") {
+    //                             obj[keyString] = this.state.rowId;
+    //                         } else {
+    //                             obj[keyString] = "";
+    //                         }
+    //                     });
+    //                     // obj = { "id": this.state.rowId, "date": "", "day": "", "bottleType": "", "rate": "", "bottleCount": "", "empCount": "", "empCost": "", "totalCost": "" };
+    //                 }
+    //                 newRowData.push(obj);
+    //             });
+    //             this.setState({ rowData: newRowData, undoStack, redoStack: [] });
+    //         } else if (this.state.showDeleteRowInput && this.state.rowId) {
+    //             newRowData = rowData.filter((item) => item.s_no !== this.state.rowId);
+    //             newRowData.map((obj) => {
+    //                 if (obj.s_no > this.state.rowId) {
+    //                     obj.s_no = obj.s_no - 1;
+    //                 }
+    //             });
+    //             this.setState({ rowData: newRowData, undoStack, redoStack: [] });
+    //         }
+    //         this.setState({ showDeleteRowInput: false, showClearRowInput: false });
+    //     } else if (e.which == 27 || e.keyCode == 27) {
+    //         this.setState({ showDeleteRowInput: false, showClearRowInput: false });
+    //     }
+    //     this.setState({ rowId: parseInt(e.target.value) });
+    // }
     onUndoClick = () => {
         if (!_.isEmpty(this.state.undoStack)) {
             let undoStack = _.cloneDeep(this.state.undoStack);
@@ -366,7 +447,7 @@ class InHousePage extends React.Component {
             redoStack.push(_.cloneDeep(this.state.rowData));
             // delete undoStack[(undoStack.length-1)];
             undoStack.pop();
-            this.setState({ undoStack, rowData: newRowData, redoStack });
+            this.setState({ undoStack, rowData: newRowData, redoStack, selectedIndexes: [], selectedRows: [] });
         }
     }
     onRedoClick = () => {
@@ -376,7 +457,7 @@ class InHousePage extends React.Component {
             let undoStack = this.state.undoStack ? _.cloneDeep(this.state.undoStack) : [];
             undoStack.push(_.cloneDeep(this.state.rowData));
             redoStack.pop();
-            this.setState({ rowData: newRowData, redoStack, undoStack });
+            this.setState({ rowData: newRowData, redoStack, undoStack, selectedIndexes: [], selectedRows: [] });
         }
     }
     getWorkBookDetails = (columns) => {
@@ -391,19 +472,44 @@ class InHousePage extends React.Component {
     onClickRefresh = () => {
         if (!_.isEmpty(this.props.userDetails) && !_.isEmpty(this.props.token)) {
             // let URL = "http://localhost:3010/api/inhouse-getdata?date="+ this.props.userDetails.lastSavedDateForInhouse.toString();
-            let URL = "https://goli-soda-services.herokuapp.com/api/inhouse-getdata?date="+ this.props.userDetails.lastSavedDateForInhouse.toString();
-            this.setState({ rowData: [], redoStack: [], undoStack:[] });
+            let URL = "https://goli-soda-services.herokuapp.com/api/inhouse-getdata?date=" + this.props.userDetails.lastSavedDateForInhouse.toString();
+            // this.showDatePicker = false;
+            this.setState({ rowData: [], redoStack: [], undoStack: [], selectedIndexes: [], selectedRows: [] });
             this.props.inHousePageActions.updateInHousePageGridData([]);
             this.props.inHousePageActions.getInHousePageDetails(URL, this.props.token.toString());
         }
     }
+
+    onRowsSelected = rows => {
+        this.setState({
+            selectedIndexes: this.state.selectedIndexes.concat(
+                rows.map(r => r.rowIdx)
+            ),
+            selectedRows: this.state.selectedRows.concat(
+                rows.map(r => r.row.id)
+            )
+        });
+    };
+
+    onRowsDeselected = rows => {
+        let rowIndexes = rows.map(r => r.rowIdx);
+        let rowsSelected = rows.map(r => r.row.id);
+        this.setState({
+            selectedIndexes: this.state.selectedIndexes.filter(
+                i => rowIndexes.indexOf(i) === -1
+            ),
+            selectedRows: this.state.selectedRows.filter(
+                i => rowsSelected.indexOf(i) === -1
+            ),
+        });
+    };
     render() {
-         //To show notifications for succes/error/warning
-         if(!_.isEmpty(this.props.searchErrorMessage)){
-            if(!_.isEmpty(this.props.searchErrorMessage) && this.props.searchErrorMessage.message && this.props.searchErrorMessage.type === "error"){
+        //To show notifications for succes/error/warning
+        if (!_.isEmpty(this.props.searchErrorMessage)) {
+            if (!_.isEmpty(this.props.searchErrorMessage) && this.props.searchErrorMessage.message && this.props.searchErrorMessage.type === "error") {
                 NotificationManager.error(this.props.searchErrorMessage.message, 'Message', 4000);
                 this.props.inHousePageActions.onErrorSearchDetails({});
-            }else if(!_.isEmpty(this.props.searchErrorMessage) && this.props.searchErrorMessage.message && this.props.searchErrorMessage.type === "success"){
+            } else if (!_.isEmpty(this.props.searchErrorMessage) && this.props.searchErrorMessage.message && this.props.searchErrorMessage.type === "success") {
                 NotificationManager.success(this.props.searchErrorMessage.message, 'Message', 3000);
                 this.props.inHousePageActions.onErrorSearchDetails({});
             }
@@ -437,7 +543,7 @@ class InHousePage extends React.Component {
                         onGridRowsUpdated={this.handleGridRowsUpdated}
                         onRowClick={this.onRowClick}
                         rowSelection={{
-                            showCheckbox: false,
+                            showCheckbox: true,
                             enableShiftSelect: true,
                             onRowsSelected: this.onRowsSelected,
                             onRowsDeselected: this.onRowsDeselected,
@@ -450,7 +556,7 @@ class InHousePage extends React.Component {
                         <i className="fas fa-save"></i>Save Data</button>
                     <button className="btn btn-sm btn-primary buttons" onClick={this.onCreateRow}>
                         <i className="fas fa-plus-circle"></i>Create Row</button>
-                    <button className="btn btn-sm btn-primary buttons" onClick={this.onClearRow}>
+                    {/* <button className="btn btn-sm btn-primary buttons" onClick={this.onClearRow}>
                         <i className="fas fa-minus-circle"></i>Clear Row</button>
                     {this.state.showClearRowInput ?
                         <input
@@ -459,17 +565,17 @@ class InHousePage extends React.Component {
                             defaultValue=""
                             onKeyUp={this.onChangeInput}
                         />
-                        : null}
+                        : null} */}
                     <button className="btn btn-sm btn-primary buttons" onClick={this.onDeleteRow}>
                         <i className="fas fa-trash-alt"></i>Delete Row</button>
-                    {this.state.showDeleteRowInput ?
+                    {/* {this.state.showDeleteRowInput ?
                         <input
                             type="number"
                             placeholder="Enter Row No"
                             defaultValue=""
                             onKeyUp={this.onChangeInput}
                         /> :
-                        null}
+                        null} */}
                     <button className="btn btn-sm btn-primary buttons" data-toggle="tooltip" data-animation="true"
                         data-placement="top" title="Undo" onClick={this.onUndoClick} disabled={_.isEmpty(this.state.undoStack) ? true : false}>
                         <i className="fas fa-undo"></i>Undo</button>
