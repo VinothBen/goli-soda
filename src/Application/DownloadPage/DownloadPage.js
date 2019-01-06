@@ -92,7 +92,7 @@ class DownloadPage extends React.Component {
                 editable: true
             },
             {
-                key: 'bottles_for_cost',
+                key: 'bottle_for_cost',
                 name: 'BOTTLES FOR COST',
                 editable: true
             }
@@ -662,7 +662,7 @@ class DownloadPage extends React.Component {
                         aria-labelledby="contained-modal-title"
                         animation={false}
                     >
-                        <Modal.Header closeButton>
+                        <Modal.Header closeButton className="chart-modal-header">
                             <Modal.Title id="contained-modal-title">
                                 Pie Chart View
                             </Modal.Title>
