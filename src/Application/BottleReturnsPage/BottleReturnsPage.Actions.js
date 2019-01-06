@@ -39,6 +39,13 @@ export const getBottleReturnsDetailsSuccess = (data) => {
     }
 }
 
+export const getBottleReturnsDetailsReInitialise = (data) => {
+    return {
+        type: bottleReturnsConstants.GET_BOTTLE_RETURNS_DATA_SUCCESS,
+        data
+    }
+}
+
 export const getBottleReturnsDetailsFailure = () => {
     return {
         type: bottleReturnsConstants.GET_BOTTLE_RETURNS_DATA_FAILURE,
@@ -96,8 +103,9 @@ export const onErrorSearchDetails = (data) => {
     }
 }
 
-export const saveBottleReturnsData = (url, postData, tokenValue) => {
+export const saveBottleReturnsData = (url, postData, tokenValue, rowData) => {
     return (dispatch) => {
+        dispatch(showBottleReturnsSpinner(true));
         url = decodeURIComponent(url);
         let myHeaders = new Headers(
             {
@@ -117,12 +125,20 @@ export const saveBottleReturnsData = (url, postData, tokenValue) => {
             .then(data => {
                 if (data.errors && data.errors.error) {
                     dispatch(onErrorSearchDetails({ message: "Save failed - " + data.errors.message, type: "error" }));
+                    dispatch(showBottleReturnsSpinner(false));
                 } else if (data && data.message) {
                     dispatch(onErrorSearchDetails({ message: data.message, type: "success" }));
+                    dispatch(showBottleReturnsSpinner(false));
+                    dispatch(updateBottleReturnsGridData(rowData));
+                    dispatch(getBottleReturnsDetailsReInitialise(rowData));
                 } else {
                     dispatch(onErrorSearchDetails({ message: "Save failed.", type: "error" }));
+                    dispatch(showBottleReturnsSpinner(false));
                 }
             })
-            .catch(() => dispatch(onErrorSearchDetails({ message: "Save failed.", type: "error" })));
+            .catch(() => {
+                dispatch(showBottleReturnsSpinner(false));
+                dispatch(onErrorSearchDetails({ message: "Save failed.", type: "error" }))
+            });
     }
 }

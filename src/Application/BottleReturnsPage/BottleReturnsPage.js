@@ -69,21 +69,14 @@ class BottleReturnsPage extends React.Component {
                     format: "string"
                 },
                 {
-                    key: 'area',
-                    name: 'AREA',
-                    editable: true,
-                    format: "string"
-
-                },
-                {
                     key: 'bottle_type',
                     name: 'BOTTLE TYPE',
                     editor: this.BottleType,
                     format: "string"
                 },
                 {
-                    key: 'delivered_bottles',
-                    name: 'DELEVERED BOTTLES',
+                    key: 'area',
+                    name: 'AREA',
                     editable: true,
                     format: "string"
 
@@ -92,14 +85,21 @@ class BottleReturnsPage extends React.Component {
                     key: 'empty_bottles_count',
                     name: 'EMPTY BOTTLES COUNT',
                     editable: true,
-                    format: "string"
+                    format: "number"
+
+                },
+                {
+                    key: 'delivered_bottles',
+                    name: 'DELIVERED BOTTLES',
+                    editable: true,
+                    format: "number"
 
                 },
                 {
                     key: 'return_bottles',
                     name: 'RETURN BOTTLES',
-                    editable: true,
-                    format: "string"
+                    editable: false,
+                    format: "number"
 
                 }
             ];
@@ -136,6 +136,7 @@ class BottleReturnsPage extends React.Component {
 
     handleGridRowsUpdated = ({ fromRow, toRow, updated }) => {
         let isValidData = null;
+        let isInvalidData = false;
         // ****** Add validation for all Data *****//
         if (!_.isEmpty(updated) && !_.isEmpty(updated[Object.keys(updated)[0]])) {
             try {
@@ -156,6 +157,7 @@ class BottleReturnsPage extends React.Component {
             }
             if (!_.isEmpty(this.state.rowData) && isValidData === null) {
                 let rowData = this.state.rowData.slice();
+                let originalRowData = _.cloneDeep(this.state.rowData);
                 for (let i = fromRow; i <= toRow; i++) {
                     let rowToUpdate = rowData[i];
                     let updatedRow = update(rowToUpdate, { $merge: updated });
@@ -164,10 +166,24 @@ class BottleReturnsPage extends React.Component {
                             day: moment(updated.date).format("dddd")
                         };
                         updatedRow = update(updatedRow, { $merge: updateDay });
+                    } else if (updated.empty_bottles_count || updated.delivered_bottles) {
+                        if (Number(updatedRow.empty_bottles_count) >= Number(updatedRow.delivered_bottles)) {
+                            let updateReturnBottles = {
+                                return_bottles: (Number(updatedRow.empty_bottles_count) - Number(updatedRow.delivered_bottles)).toString()
+                            };
+                            updatedRow = update(updatedRow, { $merge: updateReturnBottles });
+                        } else if (Number(updatedRow.delivered_bottles) > Number(updatedRow.empty_bottles_count)) {
+                            isInvalidData = true;
+                        }
                     }
                     rowData[i] = updatedRow;
                 }
-                this.setState({ rowData });
+                if (isInvalidData) {
+                    this.setState({ rowData: originalRowData });
+                    NotificationManager.error(`Invalid Data Entered.`, 'Message', 4000);
+                } else {
+                    this.setState({ rowData });
+                }
             } else {
                 NotificationManager.error(`Invalid ${isValidData} Format.`, 'Message', 4000);
             }
@@ -238,18 +254,18 @@ class BottleReturnsPage extends React.Component {
                 console.log("...error", error);
             }
         } else {
-            let maxId = _.maxBy(rowData, (obj) => { return obj.id });
-            let maxSerialNo = rowData.length;
+            let maxId = _.maxBy(rowData, (obj) => { return Number(obj.id) });
+            // let maxSerialNo = rowData.length;
             let objectKeyName = Object.keys(rowData[0]);
             let value = {};
             objectKeyName.map((obj) => {
                 if (obj === "id") {
-                    value[obj] = maxId.id + 1;
+                    value[obj] = (Number(maxId.id) + 1).toString();
                 } else {
                     value[obj] = "";
                 }
             });
-            value.id = (maxSerialNo + 1).toString();
+            // value.id = (maxSerialNo + 1).toString();
             rowData.push(value);
         }
         this.setState({ rowData, undoStack, redoStack: [] });
@@ -330,15 +346,15 @@ class BottleReturnsPage extends React.Component {
         }
     }
 
-    onClickRefresh = () => {
-        if (!_.isEmpty(this.props.userDetails) && !_.isEmpty(this.props.token)) {
-            // let URL = "http://localhost:3010/api/getBottleReturnsData?date=" + this.props.userDetails.lastSavedDateForBottleReturns.toString();
-            let URL = "https://goli-soda-services.herokuapp.com/api/getBottleReturnsData?date=" + this.props.userDetails.lastSavedDateForBottleReturns.toString();
-            this.setState({ rowData: [], redoStack: [], undoStack: [], selectedIndexes: [], selectedRows: [] });
-            this.props.bottleReturnActions.updateBottleReturnsGridData([]);
-            this.props.bottleReturnActions.getBottleReturnsDetails(URL, this.props.token.toString());
-        }
-    }
+    // onClickRefresh = () => {
+    //     if (!_.isEmpty(this.props.userDetails) && !_.isEmpty(this.props.token)) {
+    //         // let URL = "http://localhost:3010/api/getBottleReturnsData?date=" + this.props.userDetails.lastSavedDateForBottleReturns.toString();
+    //         let URL = "https://goli-soda-services.herokuapp.com/api/getBottleReturnsData?date=" + this.props.userDetails.lastSavedDateForBottleReturns.toString();
+    //         this.setState({ rowData: [], redoStack: [], undoStack: [], selectedIndexes: [], selectedRows: [] });
+    //         this.props.bottleReturnActions.updateBottleReturnsGridData([]);
+    //         this.props.bottleReturnActions.getBottleReturnsDetails(URL, this.props.token.toString());
+    //     }
+    // }
     onRowsSelected = rows => {
         this.setState({
             selectedIndexes: this.state.selectedIndexes.concat(
@@ -379,8 +395,8 @@ class BottleReturnsPage extends React.Component {
                 <NotificationContainer />
                 <div className="nav-title">
                     <h4 className="nav-title-text">BOTTLE RETURNS DETAILS :</h4>
-                    <button className="btn btn-sm btn-primary buttons-logout" onClick={() => this.onClickRefresh()}>
-                        <i class="fas fa-sync-alt"></i>Refresh</button>
+                    {/* <button className="btn btn-sm btn-primary buttons-logout" onClick={() => this.onClickRefresh()}>
+                        <i class="fas fa-sync-alt"></i>Refresh</button> */}
                 </div>
                 {
                     this.state.showSpinner ? <div className="spinner-backround">&nbsp;</div> : null

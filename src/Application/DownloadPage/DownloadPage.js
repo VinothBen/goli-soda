@@ -108,31 +108,38 @@ class DownloadPage extends React.Component {
             {
                 key: 'date',
                 name: 'DATE',
-                width: 230,
+                width: 170,
                 editable: false
             },
             {
                 key: 'day',
                 name: 'DAY',
-                width: 230,
+                width: 170,
                 editable: false
+            },
+            {
+                key: 'temperature',
+                name: 'TEMERATURE (\xB0C)',
+                editable: false,
+                width: 170,
+                format: "number"
             },
             {
                 key: 'total-bottles',
                 name: 'TOTAL BOTTLES',
-                width: 240,
-                editable: false
-            },
-            {
-                key: 'bottles-producedfor',
-                name: 'BOTTLES PRODUCED FOR',
-                width: 250,
+                width: 230,
                 editable: false
             },
             {
                 key: 'employee-cost',
                 name: 'EMPLOYEE COST',
-                width: 250,
+                width: 230,
+                editable: false
+            },
+            {
+                key: 'bottles-producedfor',
+                name: 'TOTAL BOTTLES COST',
+                width: 230,
                 editable: false
             }
         ];
@@ -146,19 +153,22 @@ class DownloadPage extends React.Component {
                 key: 'date',
                 name: 'DATE',
                 editable: true,
-                format: "date"
+                format: "date",
+                width: 100
             },
             {
                 key: 'day',
                 name: 'DAY',
                 editor: this.DaysDropDownValue,
-                format: "string"
+                format: "string",
+                width: 100
             },
             {
                 key: 'bottle_type',
                 name: 'BOTTLE TYPE',
                 editor: this.BottleType,
-                format: "string"
+                format: "string",
+                width: 110
             },
             {
                 key: 'total_bottles',
@@ -176,7 +186,8 @@ class DownloadPage extends React.Component {
                 key: 'area',
                 name: 'AREA',
                 editable: true,
-                format: "string"
+                format: "string",
+                width: 100
             },
             {
                 key: 'type_of_vehicle',
@@ -188,12 +199,19 @@ class DownloadPage extends React.Component {
                 key: 'fuel_cost',
                 name: 'FUEL-COST',
                 editable: true,
-                format: "number"
+                format: "number",
+                width: 100
             },
             {
                 key: 'employee_wage',
                 name: 'EMPLOYEE - WAGE',
                 editable: true,
+                format: "number"
+            },
+            {
+                key: 'delivery_expense',
+                name: 'DELIVERY-EXPENSE',
+                editable: false,
                 format: "number"
             }
         ];
@@ -216,6 +234,12 @@ class DownloadPage extends React.Component {
                 format: "string"
             },
             {
+                key: 'bottle_type',
+                name: 'BOTTLE TYPE',
+                editor: this.BottleType,
+                format: "string"
+            },
+            {
                 key: 'area',
                 name: 'AREA',
                 editable: true,
@@ -223,21 +247,15 @@ class DownloadPage extends React.Component {
 
             },
             {
-                key: 'bottle_type',
-                name: 'BOTTLE TYPE',
-                editor: this.BottleType,
-                format: "string"
-            },
-            {
-                key: 'delivered_bottles',
-                name: 'DELEVERED BOTTLES',
+                key: 'empty_bottles_count',
+                name: 'EMPTY BOTTLES COUNT',
                 editable: true,
                 format: "string"
 
             },
             {
-                key: 'empty_bottles_count',
-                name: 'EMPTY BOTTLES COUNT',
+                key: 'delivered_bottles',
+                name: 'DELEVERED BOTTLES',
                 editable: true,
                 format: "string"
 
@@ -267,10 +285,10 @@ class DownloadPage extends React.Component {
                 "editable": false
             },
             {
-                key: "date",
-                name: "DATE",
-                width: 179,
-                editable: false
+                "key": "date",
+                "name": "DATE",
+                "width": 179,
+                "editable": false
             },
             {
                 "key": "day",
@@ -415,6 +433,7 @@ class DownloadPage extends React.Component {
                 "id": index + 1,
                 "date": value[0].date,
                 "day": value[0].day,
+                "temperature": value[0].temperature ? value[0].temperature : 0,
                 "total-bottles": totalBottles.sum ? totalBottles.sum : 0,
                 "bottles-producedfor": bottleProducedFor.sum ? bottleProducedFor.sum : 0,
                 "employee-cost": emplyeeCost.sum ? emplyeeCost.sum : 0
@@ -566,9 +585,42 @@ class DownloadPage extends React.Component {
             });
             this.makeSearchCall(e);
         } else {
+            let columnsConfig = this.columnsConfigForInHouse;
+            let rowData = this.rowData;
+            switch (e) {
+                case 2:
+                    columnsConfig = this.columnConfigForSupply;
+                    rowData = [{
+                        "id": "1",
+                        "date": "",
+                        "day": "",
+                        "bottle_type": "",
+                        "total_bottles": "",
+                        "type_of_supply": "",
+                        "area": "",
+                        "type_of_vehicle": "",
+                        "fuel_cost": "",
+                        "employee_wage": "",
+                        "delivery_expense": ""
+                    }];
+                    break;
+                case 3:
+                    columnsConfig = this.columnConfigForBottleReturns;
+                    rowData = [{
+                        "id": "1",
+                        "date": "",
+                        "day": "",
+                        "area": "",
+                        "bottle_type": "",
+                        "empty_bottles_count": "",
+                        "delivered_bottles": "",
+                        "return_bottles": ""
+                    }];
+                    break;
+            }
             this.setState({
-                downloadOptionValue: e, rowData: this.rowData,
-                rowDataDetails2: this.rowDataDetails2, showDateWarning: false
+                downloadOptionValue: e, rowData,
+                rowDataDetails2: this.rowDataDetails2, showDateWarning: false, columnsConfig
             });
         }
 

@@ -85,7 +85,7 @@ class LandingPage extends React.Component {
             </Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
-                        Aru you sure you want to logout?
+                        Do You Really Want To Log Out ?
           </Modal.Body>
                     <Modal.Footer>
                         <Button onClick={()=>this.handleOkButton()}>Ok</Button>

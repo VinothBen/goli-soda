@@ -105,6 +105,12 @@ class SupplyPage extends React.Component {
                     name: 'EMPLOYEE - WAGE',
                     editable: true,
                     format: "number"
+                },
+                {
+                    key: 'delivery_expense',
+                    name: 'DELIVERY-EXPENSE',
+                    editable: false,
+                    format: "number"
                 }
             ];
             this.setState({ showSpinner: this.props.showSpinner });
@@ -166,6 +172,11 @@ class SupplyPage extends React.Component {
                             day: moment(updated.date).format("dddd")
                         };
                         updatedRow = update(updatedRow, { $merge: updateDay });
+                    } else if (updated.employee_wage || updated.fuel_cost) {
+                        let updatedDeliveryExpense = {
+                            delivery_expense: (Number(updatedRow.employee_wage) + Number(updatedRow.fuel_cost)).toString()
+                        };
+                        updatedRow = update(updatedRow, { $merge: updatedDeliveryExpense });
                     }
                     rowData[i] = updatedRow;
                 }
@@ -232,7 +243,8 @@ class SupplyPage extends React.Component {
                 "area": "",
                 "type_of_vehicle": "",
                 "fuel_cost": "",
-                "employee_wage": ""
+                "employee_wage": "",
+                "delivery_expense": ""
             }];
             let maxId = _.maxBy(this.props.updatedGridData, (obj) => { return Number(obj.id) });
             try {
@@ -242,18 +254,18 @@ class SupplyPage extends React.Component {
                 console.log("...error", error);
             }
         } else {
-            let maxId = _.maxBy(rowData, (obj) => { return obj.id });
-            let maxSerialNo = rowData.length;
+            let maxId = _.maxBy(rowData, (obj) => { return Number(obj.id) });
+            // let maxSerialNo = rowData.length;
             let objectKeyName = Object.keys(rowData[0]);
             let value = {};
             objectKeyName.map((obj) => {
                 if (obj === "id") {
-                    value[obj] = maxId.id + 1;
+                    value[obj] = (Number(maxId.id) + 1).toString();
                 } else {
                     value[obj] = "";
                 }
             });
-            value.id = (maxSerialNo + 1).toString();
+            // value.id = (maxSerialNo + 1).toString();
             rowData.push(value);
         }
         this.setState({ rowData, undoStack, redoStack: [] });
@@ -333,15 +345,15 @@ class SupplyPage extends React.Component {
         }
     }
 
-    onClickRefresh = () => {
-        if (!_.isEmpty(this.props.userDetails) && !_.isEmpty(this.props.token)) {
-            // const URL = "http://localhost:3010/api/getSupplyData?date=" + this.props.userDetails.lastSavedDateForSupply.toString();
-            let URL = "https://goli-soda-services.herokuapp.com/api/getSupplyData?date=" + this.props.userDetails.lastSavedDateForSupply.toString();
-            this.setState({ rowData: [], redoStack: [], undoStack: [], selectedIndexes: [], selectedRows: []});
-            this.props.supplyActions.updateSupplyPageGridData([]);
-            this.props.supplyActions.getSupplyPageDetails(URL, this.props.token.toString());
-        }
-    }
+    // onClickRefresh = () => {
+    //     if (!_.isEmpty(this.props.userDetails) && !_.isEmpty(this.props.token)) {
+    //         // const URL = "http://localhost:3010/api/getSupplyData?date=" + this.props.userDetails.lastSavedDateForSupply.toString();
+    //         let URL = "https://goli-soda-services.herokuapp.com/api/getSupplyData?date=" + this.props.userDetails.lastSavedDateForSupply.toString();
+    //         this.setState({ rowData: [], redoStack: [], undoStack: [], selectedIndexes: [], selectedRows: [] });
+    //         this.props.supplyActions.updateSupplyPageGridData([]);
+    //         this.props.supplyActions.getSupplyPageDetails(URL, this.props.token.toString());
+    //     }
+    // }
     onRowsSelected = rows => {
         this.setState({
             selectedIndexes: this.state.selectedIndexes.concat(
@@ -382,8 +394,8 @@ class SupplyPage extends React.Component {
                 <NotificationContainer />
                 <div className="nav-title">
                     <h4 className="nav-title-text">SUPPLY DETAILS :</h4>
-                    <button className="btn btn-sm btn-primary buttons-logout" onClick={() => this.onClickRefresh()}>
-                        <i class="fas fa-sync-alt"></i>Refresh</button>
+                    {/* <button className="btn btn-sm btn-primary buttons-logout" onClick={() => this.onClickRefresh()}>
+                        <i class="fas fa-sync-alt"></i>Refresh</button> */}
                 </div>
                 {
                     this.state.showSpinner ? <div className="spinner-backround">&nbsp;</div> : null

@@ -98,13 +98,22 @@ class InHousePage extends React.Component {
                     key: 'date',
                     name: 'DATE',
                     editable: true,
-                    format: "date"
+                    format: "date",
+                    width: 115
                 },
                 {
                     key: 'day',
                     name: 'DAY',
                     editable: false,
-                    format: "string"
+                    format: "string",
+                    width: 115
+                },
+                {
+                    key: 'temperature',
+                    name: 'TEMPERATURE (\xB0C)',
+                    editable: true,
+                    width: 140,
+                    format: "number"
                 },
                 {
                     key: 'bottle_type',
@@ -116,20 +125,23 @@ class InHousePage extends React.Component {
                     key: 'rate',
                     name: 'RATE',
                     editable: true,
-                    format: "number"
+                    format: "number",
+                    width: 120
                 },
                 {
                     key: 'no_of_bottles',
-                    name: 'NO.OF.BOTTLES',
+                    name: 'BOTTLES COUNT',
                     editable: true,
-                    format: "number"
+                    format: "number",
+                    width: 140
 
                 },
                 {
                     key: 'employee_involved',
                     name: 'EMPLOYEE-INVOLVED',
                     editable: true,
-                    format: "number"
+                    format: "number",
+                    width: 160
                 },
                 {
                     key: 'employee_cost',
@@ -138,8 +150,8 @@ class InHousePage extends React.Component {
                     format: "number"
                 },
                 {
-                    key: 'bottles_for_cost',
-                    name: 'BOTTLES FOR COST',
+                    key: 'bottle_for_cost',
+                    name: 'MANUFACTURING COST',
                     editable: false,
                     format: "number"
                 }
@@ -202,6 +214,9 @@ class InHousePage extends React.Component {
             //     // let URL = "https://goli-soda-services.herokuapp.com/api/inhouse-getdata";
             //     this.props.inHousePageActions.getInHousePageDetails(URL, nextProps.token.toString());
             // }
+            if(!_.isEqual(this.props.updatedGridData, nextProps.updatedGridData)){
+                this.setState({rowData: nextProps.updatedGridData});
+            }
             if (!_.isEmpty(nextProps.initialGridData) && !_.isEmpty(nextProps.columnConfig) && _.isEmpty(nextProps.updatedGridData)) {
                 let sortedGridData = _.sortBy(nextProps.initialGridData, 'id');
                 if (sortedGridData.length) {
@@ -272,7 +287,7 @@ class InHousePage extends React.Component {
                     let updatedRow = update(rowToUpdate, { $merge: updated });
                     if (updated.rate || updated.no_of_bottles) {
                         let updateBottleForCost = {
-                            bottles_for_cost:
+                            bottle_for_cost:
                                 ((isNaN(Number(updatedRow.rate)) ? 0 : Number(updatedRow.rate)) *
                                     (isNaN(Number(updatedRow.no_of_bottles)) ? 0 : Number(updatedRow.no_of_bottles))).toString()
                         };
@@ -356,7 +371,8 @@ class InHousePage extends React.Component {
                 "no_of_bottles": "",
                 "employee_involved": "",
                 "employee_cost": "",
-                "bottles_for_cost": ""
+                "bottle_for_cost": "",
+                "temperature": ""
             }];
             let maxId = _.maxBy(this.props.updatedGridData, (obj) => { return obj.id });
             try {
@@ -469,16 +485,17 @@ class InHousePage extends React.Component {
             return excelComponents;
         }
     }
-    onClickRefresh = () => {
-        if (!_.isEmpty(this.props.userDetails) && !_.isEmpty(this.props.token)) {
-            // let URL = "http://localhost:3010/api/inhouse-getdata?date="+ this.props.userDetails.lastSavedDateForInhouse.toString();
-            let URL = "https://goli-soda-services.herokuapp.com/api/inhouse-getdata?date=" + this.props.userDetails.lastSavedDateForInhouse.toString();
-            // this.showDatePicker = false;
-            this.setState({ rowData: [], redoStack: [], undoStack: [], selectedIndexes: [], selectedRows: [] });
-            this.props.inHousePageActions.updateInHousePageGridData([]);
-            this.props.inHousePageActions.getInHousePageDetails(URL, this.props.token.toString());
-        }
-    }
+    // onClickRefresh = () => {
+    //     if (!_.isEmpty(this.props.userDetails) && !_.isEmpty(this.props.token)) {
+    //         // let URL = "http://localhost:3010/api/inhouse-getdata?date="+ this.props.userDetails.lastSavedDateForInhouse.toString();
+    //         let URL = "https://goli-soda-services.herokuapp.com/api/inhouse-getdata?date=" + 
+    //             this.props.userDetails.lastSavedDateForInhouse.toString();
+    //         // this.showDatePicker = false;
+    //         this.setState({ rowData: [], redoStack: [], undoStack: [], selectedIndexes: [], selectedRows: [] });
+    //         this.props.inHousePageActions.updateInHousePageGridData([]);
+    //         this.props.inHousePageActions.getInHousePageDetails(URL, this.props.token.toString());
+    //     }
+    // }
 
     onRowsSelected = rows => {
         this.setState({
@@ -519,8 +536,8 @@ class InHousePage extends React.Component {
                 <NotificationContainer />
                 <div className="nav-title">
                     <h4 className="nav-title-text">IN HOUSE DATA :</h4>
-                    <button className="btn btn-sm btn-primary buttons-logout" onClick={() => this.onClickRefresh()}>
-                        <i className="fas fa-sync-alt"></i>Refresh</button>
+                    {/* <button className="btn btn-sm btn-primary buttons-logout" onClick={() => this.onClickRefresh()}>
+                        <i className="fas fa-sync-alt"></i>Refresh</button> */}
                 </div>
                 {
                     this.state.showSpinner ? <div className="spinner-backround">&nbsp;</div> : null

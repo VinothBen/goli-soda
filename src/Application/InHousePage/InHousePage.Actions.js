@@ -131,8 +131,9 @@ export const getSearchDetailsByDate = (url, tokenValue) => {
     }
 }
 
-export const saveInHouseData = (url, postData, tokenValue) => {
+export const saveInHouseData = (url, postData, tokenValue, rowData) => {
     return (dispatch) => {
+        dispatch(showInHouseSpinner(true));
         url = decodeURIComponent(url);
         let myHeaders = new Headers(
             {
@@ -152,12 +153,19 @@ export const saveInHouseData = (url, postData, tokenValue) => {
             .then(data => {
                 if (data.errors && data.errors.error) {
                     dispatch(onErrorSearchDetails({ message: "Save failed - " + data.errors.message, type: "error" }));
+                    dispatch(showInHouseSpinner(false));
                 } else if (data && data.message) {
                     dispatch(onErrorSearchDetails({ message: data.message, type: "success" }));
+                    dispatch(showInHouseSpinner(false));
+                    dispatch(updateInHousePageGridData(rowData));
                 } else {
                     dispatch(onErrorSearchDetails({ message: "Save failed.", type: "error" }));
+                    dispatch(showInHouseSpinner(false));
                 }
             })
-            .catch(() => dispatch(onErrorSearchDetails({ message: "Save failed.", type: "error" })));
+            .catch(() => {
+                dispatch(onErrorSearchDetails({ message: "Save failed.", type: "error" }));
+                dispatch(showInHouseSpinner(false));
+            });
     }
 }

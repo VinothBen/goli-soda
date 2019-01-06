@@ -38,7 +38,12 @@ export const getSupplyPageDetailsSuccess = (data) => {
         data: supplyData
     }
 }
-
+export const getSupplyPageDetailsReInitialise = (data) => {
+    return {
+        type: supplyConstants.GET_SUPPLY_DATA_SUCCESS,
+        data
+    }
+}
 export const getSupplyPageDetailsFailure = () => {
     return {
         type: supplyConstants.GET_SUPPLY_DATA_FAILURE,
@@ -96,9 +101,10 @@ export const onErrorSearchDetails = (data) => {
     }
 }
 
-export const saveSupplyData = (url, postData, tokenValue) => {
+export const saveSupplyData = (url, postData, tokenValue, rowData) => {
     return (dispatch) => {
         url = decodeURIComponent(url);
+        dispatch(showSupplySpinner(true));
         let myHeaders = new Headers(
             {
                 'Content-Type': 'application/json',
@@ -117,13 +123,22 @@ export const saveSupplyData = (url, postData, tokenValue) => {
             .then(data => {
                 if (data.errors && data.errors.error) {
                     dispatch(onErrorSearchDetails({ message: "Save failed - " + data.errors.message, type: "error" }));
+                    dispatch(showSupplySpinner(false));
                 } else if (data && data.message) {
                     dispatch(onErrorSearchDetails({ message: data.message, type: "success" }));
+                    dispatch(showSupplySpinner(false));
+                    dispatch(updateSupplyPageGridData(rowData));
+                    dispatch(getSupplyPageDetailsReInitialise(rowData));
                 } else {
                     dispatch(onErrorSearchDetails({ message: "Save failed.", type: "error" }));
+                    dispatch(showSupplySpinner(false));
                 }
             })
-            .catch(() => dispatch(onErrorSearchDetails({ message: "Save failed.", type: "error" })));
+            .catch(() => {
+                dispatch(showSupplySpinner(false));
+                dispatch(onErrorSearchDetails({ message: "Save failed.", type: "error" }))
+            }
+            );
     }
 }
 
